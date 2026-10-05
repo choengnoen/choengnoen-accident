@@ -1278,7 +1278,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
   <div class="view" id="view-routes">
     <div class="card">
       <div class="assets-toolbar" style="justify-content:flex-end">
-        <button class="btn btn-outline btn-sm" id="btnAddRoute" type="button" style="display:none">+ เพิ่มสายทาง</button>
         <div class="assets-updated-badge" id="routesUpdatedHint"></div>
       </div>
       <div class="table-wrap">
@@ -1305,7 +1304,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <input type="text" id="assetsSearchBox" name="asset-filter" autocomplete="off" placeholder="พิมพ์ค้นหารายการทรัพย์สิน...">
           <button type="button" class="assets-search-clear" id="assetsSearchClear" title="ล้างคำค้นหา">✕</button>
         </div>
-        <button class="btn btn-outline btn-sm" id="btnAddAsset" type="button" style="display:none"></button>
         <div class="assets-updated-badge" id="assetsUpdatedHint"></div>
       </div>
       <div class="asset-category-chips" id="assetCategoryChips"></div>
@@ -1964,50 +1962,6 @@ function hookMasterChanges(){
   if (masterHooked || !window.CNMaster) return;
   masterHooked = true;
   CNMaster.onChange(onMasterChange);
-}
-// ลิงก์ไปแท็บในหน้าฐานข้อมูลกลาง: 'routes' = สายทาง, 'assets' = ราคาประเมินทรัพย์สิน
-function masterUrl(tab){
-  if (!window.CNMaster) return '#';
-  return (CNMaster.EDIT_URL || '') + (tab ? '#' + tab : '');
-}
-function masterEditLink(tab, label){
-  return `<a href="${masterUrl(tab)}" target="_blank" rel="noopener">${escapeHtml(label || 'แก้ไขที่ฐานข้อมูลกลาง ↗')}</a>`;
-}
-function showMasterEditInfo(what, tab){
-  const root = document.getElementById('modalRoot');
-  root.innerHTML = `
-    <div class="modal-backdrop"><div class="modal">
-      <div class="modal-head"><h3>แก้ไข${escapeHtml(what)}</h3><button class="modal-close" id="masterInfoClose" type="button">×</button></div>
-      <p>แก้ได้ที่ฐานข้อมูลกลาง ทุกระบบเห็นข้อมูลใหม่ทันที${tab === 'assets' ? '<br><span class="hint">เคสเดิมไม่เปลี่ยนราคา</span>' : ''}</p>
-      <div class="actions">
-        <button class="btn btn-outline" id="masterInfoCancel" type="button">ปิด</button>
-        <a class="btn btn-primary" style="text-decoration:none" href="${masterUrl(tab)}" target="_blank" rel="noopener">เปิดฐานข้อมูลกลาง ↗</a>
-      </div>
-    </div></div>`;
-  document.getElementById('masterInfoClose').onclick = () => { root.innerHTML = ''; };
-  document.getElementById('masterInfoCancel').onclick = () => { root.innerHTML = ''; };
-}
-// รายการทรัพย์สินที่มีเฉพาะในระบบนี้ (ยังไม่มีในฐานกลาง) → ไฟล์ JSON สำหรับนำเข้าที่หน้าฐานข้อมูลกลาง
-// รหัสขึ้นต้น "acc-" เสมอ กันชนกับรหัสในฐานกลาง (รหัสเดิมของระบบนี้อาจซ้ำ เช่น mat-002 แต่เป็นคนละรายการ)
-function exportLocalOnlyAssets(){
-  const out = [];
-  Object.keys(materialPriceMap).forEach(name => {
-    const m = materialPriceMap[name];
-    if (m.fromMaster || m.hidden) return;
-    out.push({ key: 'acc-' + (m.key || (Date.now().toString(36) + out.length)), name, unit: m.unit, price: m.price, category: m.category || classifyAssetCategoryFallback(name), frequent: !!m.frequent });
-  });
-  getAllAssetItems().forEach(it => {
-    if (materialPriceMap[it.name]) return; // มีแล้วด้านบน
-    out.push({ key: 'acc-lib-' + out.length, name: it.name, unit: it.unit, price: it.price, category: classifyAssetCategoryFallback(it.name), frequent: true });
-  });
-  if (!out.length) { showToast('ทุกรายการมีอยู่ในฐานข้อมูลกลางแล้ว'); return; }
-  const blob = new Blob([JSON.stringify({ note: 'รายการทรัพย์สินที่มีเฉพาะในระบบงานอุบัติเหตุ — นำเข้าที่ฐานข้อมูลกลาง แท็บ "นำเข้า / ส่งออก"', materials: out }, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'accident-assets-for-master-' + new Date().toISOString().slice(0, 10) + '.json';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  showToast('ส่งออก ' + out.length + ' รายการ — นำไฟล์ไปนำเข้าที่ฐานข้อมูลกลาง');
 }
 function applyRouteDocs(docs){
   if (!docs || docs.length === 0) return;
@@ -3242,8 +3196,8 @@ function updateZoneFields(fromRemote){
     refreshMooOptions(null, curMoo);
     if (hw && km !== null) {
       hint.innerHTML = ZONES.length
-        ? 'ไม่พบเขตพื้นที่สำหรับ ทล.' + escapeHtml(hw) + ' กม.' + escapeHtml(formatKm(km)) + ' — กรอก สภ./ตำบล/อำเภอ เอง หรือเพิ่มเขตที่ฐานข้อมูลกลาง ' + masterEditLink('zones', 'เปิดหน้าเขตพื้นที่ ↗')
-        : 'ยังโหลดเขตพื้นที่จากฐานข้อมูลกลางไม่ได้ — กรอก สภ./ตำบล/อำเภอ เอง หรือรีเฟรชหน้า ' + masterEditLink('zones', 'เปิดฐานข้อมูลกลาง ↗');
+        ? 'ไม่พบเขตพื้นที่สำหรับ ทล.' + escapeHtml(hw) + ' กม.' + escapeHtml(formatKm(km)) + ' — กรอก สภ./ตำบล/อำเภอ เอง'
+        : 'ยังโหลดเขตพื้นที่จากฐานข้อมูลกลางไม่ได้ — กรอก สภ./ตำบล/อำเภอ เอง หรือรีเฟรชหน้า';
       hint.classList.add('warn');
     } else {
       hint.textContent = 'เลือกสายทางและ กม. ระบบจะเติม สภ./ตำบล/อำเภอ/หมู่ จากฐานข้อมูลกลางให้อัตโนมัติ (แก้เองได้)';
@@ -3280,7 +3234,7 @@ function openZoneFillModal(){
     root.innerHTML = `
       <div class="modal-backdrop"><div class="modal edit-modal">
         <div class="modal-head em-head"><div><div class="em-lbl">ตั้งค่า</div><h3>เติมเขตพื้นที่ให้เคสที่ยังว่าง</h3></div><button class="modal-close" id="zfClose" type="button">×</button></div>
-        <div class="modal-body em-body"><p class="em-hint" style="margin:0">ยังโหลดเขตพื้นที่จากฐานข้อมูลกลางไม่ได้ (หรือฐานกลางยังไม่มีข้อมูลเขต) — ลองรีเฟรชหน้าแล้วกดใหม่ ${masterEditLink('zones', 'เปิดหน้าเขตพื้นที่ ↗')}</p></div>
+        <div class="modal-body em-body"><p class="em-hint" style="margin:0">ยังโหลดเขตพื้นที่จากฐานข้อมูลกลางไม่ได้ (หรือฐานกลางยังไม่มีข้อมูลเขต) — ลองรีเฟรชหน้าแล้วกดใหม่</p></div>
         <div class="cd-foot"><button class="btn btn-outline" id="zfCancel" type="button">ปิด</button></div>
       </div></div>`;
     document.getElementById('zfClose').onclick = document.getElementById('zfCancel').onclick = () => { root.innerHTML = ''; };
@@ -3294,7 +3248,7 @@ function openZoneFillModal(){
     <tr><td class="nowrap-cell">${escapeHtml(caseNo(c.rec))}</td><td>${escapeHtml(posText(c.rec))}</td>
     <td>${escapeHtml(c.patch.policeStation || '-')}</td><td>${escapeHtml(zoneAreaText(c.patch) || '-')}${c.patch.moo ? ' · ' + escapeHtml(c.patch.moo) : ''}</td></tr>`).join('');
   const nfHtml = notFound.length ? `
-    <div class="em-sec">ไม่พบเขตพื้นที่ ${notFound.length} เคส (ข้ามไป — กรอกเองที่เคส หรือเพิ่มเขตที่ฐานข้อมูลกลาง ${masterEditLink('zones', 'เปิดหน้าเขตพื้นที่ ↗')})</div>
+    <div class="em-sec">ไม่พบเขตพื้นที่ ${notFound.length} เคส (ข้ามไป — กรอกเองที่เคส)</div>
     <p class="em-hint" style="margin:0">${notFound.slice(0, 40).map(r => escapeHtml(caseNo(r) + ' (' + posText(r) + ')')).join(' · ')}${notFound.length > 40 ? ' …' : ''}</p>` : '';
   root.innerHTML = `
     <div class="modal-backdrop"><div class="modal edit-modal">
@@ -5261,9 +5215,6 @@ function renderRoutesTable(){
   }
   tbody.innerHTML = html;
 
-  // สายทางแก้ได้ที่ฐานข้อมูลกลางเท่านั้น — ระบบนี้ไม่มีปุ่ม/ลิงก์แก้ไข (รวมตอนต่อฐานกลางไม่ได้)
-  const addBtn = document.getElementById('btnAddRoute');
-  if (addBtn) addBtn.style.display = 'none';
   updateRoutesUpdatedHint();
 }
 // แยกช่วง กม. หลายช่วงที่คั่นด้วยจุลภาค เช่น "0+000 - 1+308, 2+346 - 3+292" กลับเป็น [[0,1308],[2346,3292]]
@@ -5281,7 +5232,7 @@ function parseKmRangesText(text){
 }
 // โมดัลเพิ่ม/แก้ไขสายทาง 1 สาย — ส่ง route เป็น null เพื่อเปิดในโหมด "เพิ่มสายทางใหม่", ส่ง object เพื่อแก้ไขของเดิม (เฉพาะเจ้าของระบบ)
 // preset = { status: 'transferred' } ใช้ตอนกดมาจากหน้าลบสายทางที่มีเคสอยู่ เพื่อเลือก "โอนแล้ว" ไว้ให้
-function openRouteEditModal(route, preset){
+function openRouteEditModal(route, preset){ return; // ปิดการใช้งาน: สายทางเป็นข้อมูลกลาง ดูได้อย่างเดียว
   const root = document.getElementById('modalRoot');
   const isNew = !route;
   const r = route || { highway:'', controlNo:'', section:'', kmRanges:[], distanceActual:null, distance2Lane:null, asphalt:null, concrete:null, workQty:null, status:'active' };
@@ -5443,7 +5394,7 @@ function updateRoutesUpdatedHint(){
   if (!el) return;
   if (masterRoutesOn) {
     const upd = normalizeDateStr(CNMaster.updatedAt('routes'));
-    el.innerHTML = 'จากฐานข้อมูลกลาง' + (upd ? ' · อัปเดต ' + escapeHtml(formatThaiDate(upd)) : '') + '';
+    el.innerHTML = 'ข้อมูลจากฐานข้อมูลกลาง' + (upd ? ' · อัปเดต ' + escapeHtml(formatThaiDate(upd)) : '');
     return;
   }
   const dates = ROUTES.map(r => r.updatedAt).filter(Boolean).sort();
@@ -5634,7 +5585,7 @@ function renderAssetsPanel(){
     group.forEach(it => {
       rowsHtml.push(`
         <tr data-idx="${idx}" class="${it.frequent ? 'asset-frequent' : ''}">
-          <td>${escapeHtml(it.name)}${it.frequent ? '<span class="asset-frequent-badge">★ ใช้บ่อย</span>' : ''}${masterAssetsOn && !it.fromMaster ? '<span class="asset-frequent-badge" style="background:#FDE2E0;color:#B92A22" title="ยังไม่มีในฐานข้อมูลกลาง — ส่งออกแล้วนำเข้าที่ฐานกลาง">เฉพาะระบบนี้</span>' : ''}${it.dupName ? '<span class="asset-frequent-badge" style="background:#FDE2E0;color:#B92A22" title="ฐานข้อมูลกลางมีหลายรายการชื่อเดียวกัน">ชื่อซ้ำในฐานกลาง</span>' : ''}</td>
+          <td>${escapeHtml(it.name)}${it.frequent ? '<span class="asset-frequent-badge">★ ใช้บ่อย</span>' : ''}${masterAssetsOn && !it.fromMaster ? '<span class="asset-frequent-badge" style="background:#FDE2E0;color:#B92A22" title="ยังไม่มีในฐานข้อมูลกลาง">เฉพาะระบบนี้</span>' : ''}${it.dupName ? '<span class="asset-frequent-badge" style="background:#FDE2E0;color:#B92A22" title="ฐานข้อมูลกลางมีหลายรายการชื่อเดียวกัน">ชื่อซ้ำในฐานกลาง</span>' : ''}</td>
           <td class="mono" style="text-align:center">${escapeHtml(it.unit)}</td>
           <td class="mono" style="text-align:center">${formatMoney(it.price)}</td>
         </tr>
@@ -5646,20 +5597,10 @@ function renderAssetsPanel(){
 
   tbody.innerHTML = rowsHtml.length ? rowsHtml.join('') : `<tr><td colspan="${colSpan}" class="hint" style="text-align:center;padding:20px">ไม่พบรายการที่ค้นหา</td></tr>`;
 
-  // ราคาประเมินแก้ได้ที่ฐานข้อมูลกลางเท่านั้น — ระบบนี้ไม่มีปุ่ม/ลิงก์แก้ไข (รวมตอนต่อฐานกลางไม่ได้)
-  // ปุ่มเดียวที่เหลือ = ส่งออกรายการเฉพาะระบบนี้ (ไม่แก้ข้อมูล) ไว้นำเข้าที่ฐานกลาง
-  const addBtn = document.getElementById('btnAddAsset');
-  if (addBtn) {
-    const n = masterAssetsOn ? allVisible.filter(it => !it.fromMaster).length : 0;
-    addBtn.textContent = 'ส่งออกรายการเฉพาะระบบนี้ (' + n + ')';
-    addBtn.title = 'ดาวน์โหลดรายการที่ยังไม่มีในฐานข้อมูลกลาง เพื่อนำเข้าที่หน้าฐานข้อมูลกลาง';
-    addBtn.style.display = owner && n ? '' : 'none';
-    addBtn.onclick = exportLocalOnlyAssets;
-  }
   updateAssetsUpdatedHint();
 }
 
-function openAssetEditModal(item){
+function openAssetEditModal(item){ return; // ปิดการใช้งาน: ราคาประเมินเป็นข้อมูลกลาง ดูได้อย่างเดียว
   const root = document.getElementById('modalRoot');
   const isNew = !item;
   const it = item || { name:'', unit:'', price:0, key:'', category:'', frequent:false };
