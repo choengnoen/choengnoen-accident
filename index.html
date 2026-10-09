@@ -14,6 +14,7 @@
 <!-- ฐานข้อมูลกลาง (สายทาง / ราคาประเมินทรัพย์สินแยกปีงบ) จาก CN-Hub — ถ้าโหลดไม่ได้ ระบบใช้ข้อมูลเดิมในโปรเจกต์นี้แทน -->
 <script src="https://choengnoen.github.io/choengnoen-Hub/master-client.js"></script>
 <script src="firebase-layer.js"></script>
+<script src="drafts.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600;700&family=Sarabun:wght@400;500;600;700&display=swap');
 
@@ -877,6 +878,55 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 #dashYearFilter button,.year-dropdown-btn{font-family:'Kanit',sans-serif;font-weight:600}
 #dashYearFilter button.active,.year-dropdown-btn.active{background:linear-gradient(135deg,var(--amber-500),var(--amber));color:#fff;border-color:transparent;box-shadow:0 4px 12px -2px rgba(224,98,15,.4)}
 #dashYearFilter button.active:hover,.year-dropdown-btn.active:hover{filter:brightness(1.06);color:#fff}
+/* ===== รูปถ่ายประกอบเคส (ไม่เกิน 2 รูป · เก็บใน Google Drive) ===== */
+.ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.ph-grid{grid-template-columns:1fr}}
+.ph-slot{border:1px solid var(--line,#dfe2dd);border-radius:12px;padding:10px;background:var(--card,#fff)}
+.ph-title{font-weight:600;font-size:13px;margin-bottom:8px;color:var(--ink-soft,#4d5a66)}
+.ph-empty{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:4/3;border:2px dashed var(--line,#dfe2dd);border-radius:10px;background:var(--paper,#f5f6f4);color:var(--ink-soft,#4d5a66);font:inherit;font-size:14px}
+.ph-add{cursor:pointer}
+.ph-add:hover:not(:disabled){border-color:currentColor;color:var(--ink,#182430)}
+.ph-add:disabled{opacity:.55;cursor:not-allowed}
+.ph-img{width:100%;aspect-ratio:4/3;border-radius:10px;background:var(--paper-2,#eceee9) center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--ink-mute,#8792a0);font-size:13px}
+.ph-bar{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.ph-bar span{margin-right:auto;font-size:12px;color:var(--ink-soft,#4d5a66)}
+.cd-photos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cd-photo{aspect-ratio:4/3;border-radius:10px;border:1px solid var(--line,#dfe2dd);background:var(--paper-2,#eceee9) center/cover no-repeat;cursor:zoom-in;display:flex;align-items:center;justify-content:center;color:var(--ink-mute,#8792a0);font-size:12px}
+.ph-lightbox{position:fixed;inset:0;z-index:10001;background:rgba(7,27,48,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px}
+.ph-lightbox img{max-width:100%;max-height:calc(100vh - 90px);object-fit:contain;border-radius:8px;cursor:zoom-out}
+.ph-lb-bar{display:flex;gap:10px;align-items:center;color:#fff;font-size:14px}
+.ph-lb-bar .btn-outline{background:#fff;color:#182430;border-color:#fff;text-decoration:none}
+/* ===== ปุ่ม "คัดลอกเป็นรูป" ในหัวหน้าต่างรายละเอียดเคส + ชุดสไตล์ของรูปที่ใช้วางใน LINE (แบบ 5 แนวนอน) ===== */
+.cd-hd-actions{display:flex;align-items:center;gap:8px;flex:none}
+.cd-copy{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:7px 14px;background:#ffffff26;color:#fff;font:600 13.5px 'Sarabun',sans-serif;cursor:pointer;white-space:nowrap}
+.cd-copy:hover{background:#fff;color:var(--navy-900)}
+.cd-copy:disabled{opacity:.8;cursor:wait}
+.cd-copy.ok{background:var(--green);color:#fff}
+@media(max-width:560px){.cd-copy span{display:none}}
+.cd-snap-stage{position:fixed;left:-12000px;top:0;z-index:-1;width:auto}
+.cd-snap-stage .snap{display:block;width:1100px;max-width:none;max-height:none;overflow:visible;animation:none;box-shadow:none;border-radius:0;padding:0}
+.cd-snap-stage .snap .modal-body{overflow:visible;max-height:none;margin:0;padding:12px 14px}
+.snap .cd-hd{padding:14px 20px 12px}
+.snap .cd-hd h3{font-size:26px}
+.snap .snap-grid{display:grid;gap:10px}
+.snap .snap-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.snap .cd-tiles{grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0}
+.snap .cd-tile{padding:6px 10px}
+.snap .cd-card{padding:9px 12px;margin-bottom:0}
+.snap .cd-sec{font-size:14px;margin-bottom:6px}
+.snap .cd-dl.wide{display:grid;grid-template-columns:62px 1fr 62px 1fr;gap:3px 8px;font-size:13px}
+.snap .cd-dl.wide dd.full{grid-column:2 / -1}
+.snap .cd-divider{margin:8px 0}
+.snap .cd-photos{gap:8px}
+.snap .cd-photo{aspect-ratio:4/3}
+.snap .snap-items2{display:grid;grid-template-columns:1fr 1fr;column-gap:20px}
+.snap .cd-item{padding:4px 0}
+.snap .cd-item b{font-size:13px}
+.snap .cd-q{font-size:11.5px}
+.snap .cd-receipt{padding:8px 13px;margin-top:8px}
+.snap .cd-ln{font-size:13px;padding:1px 0}
+.snap .cd-grand{font-size:21px}
+.snap-stamp{padding:8px 16px 10px;background:#fff;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink-mute);text-align:center}
 </style>
 </head>
 <body>
@@ -921,6 +971,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 
   
   <div class="view" id="view-form">
+   <div id="draftPanel" style="margin-bottom:14px"></div>
    <div class="form-layout">
     <div class="form-main">
     <div class="edit-mode-banner" id="editModeBanner">
@@ -947,7 +998,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         </div>
         <div class="field">
           <label>เวลา</label>
-          <input type="text" id="f_time">
+          <input type="time" id="f_time">
         </div>
       </div>
       <div class="grid grid-4" style="margin-top:12px">
@@ -1172,6 +1223,13 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <div class="hint">ภายใน 10 วันนับจากวันเกิดเหตุ — กรอกวันที่ส่งแล้ว ระบบแจ้งเตือนจะเลิกติดตามเรื่องนี้</div>
         </div>
       </div>
+    </div>
+
+    <div class="card" id="fsecPhoto">
+      <div class="section-title"><span class="num">5</span> รูปถ่ายประกอบ <span class="sub">ไม่เกิน 2 รูป · ไม่บังคับ</span></div>
+      <div class="ph-grid" id="photoGrid"></div>
+      <input type="file" accept="image/*" id="photoFile" style="display:none">
+      <div class="hint" id="photoHint" style="margin-top:10px"></div>
     </div>
 
     <div class="form-savebar">
@@ -2016,6 +2074,7 @@ function refreshVisibleViews(){
     if (v === 'dash') renderDashboard();
     if (v === 'assets') renderAssetsPanel();
     if (v === 'routes') renderRoutesTable();
+    if (v === 'form' && window.DRAFTS) DRAFTS.render();
   } catch (e) { console.error('refresh failed', e); }
   window.scrollTo(window.scrollX, scrollY);
 }
@@ -2578,6 +2637,7 @@ function initTabs(){
       if (btn.dataset.view === 'settings') renderTeamPanel();
       if (btn.dataset.view === 'assets') renderAssetsPanel();
       if (btn.dataset.view === 'routes') renderRoutesTable();
+      if (btn.dataset.view === 'form' && window.DRAFTS) DRAFTS.render();
       recordViewInHistory(btn.dataset.view);
     });
   });
@@ -3300,8 +3360,153 @@ function openZoneFillModal(){
 }
 
 /* ============ form: save / edit / clear ============ */
+/* ============ รูปถ่ายประกอบเคส (ไม่เกิน 2 รูป · เก็บใน Google Drive ผ่าน drive-bridge) ============
+   - เลือก/ถ่ายรูป → ย่อในเครื่องทันที (ด้านยาวไม่เกิน 1920 px) → ยังไม่อัปโหลดจนกว่าจะกด "บันทึกข้อมูล"
+   - ในเคสเก็บเฉพาะที่อยู่ไฟล์ rec.photos = [{ path, at, by }] · เอารูปออกจากเคส = ตัดออกจากรายการ (ไฟล์ใน Drive ถูกลบเฉพาะเมื่อผู้ทำเป็นเจ้าของ/ผู้ดูแลระบบ)
+   - ถ้าอัปโหลดรูปไม่สำเร็จ จะไม่บันทึกเคส (ข้อมูลในฟอร์มยังอยู่ กดบันทึกซ้ำได้ รูปที่อัปโหลดไปแล้วไม่อัปโหลดซ้ำ) */
+const PHOTO_SLOT_LABELS = ['ภาพรวมจุดเกิดเหตุ', 'ภาพความเสียหาย'];
+let formPhotos = [null, null];   // ช่องละ 1 รูป: null | { saved:{path,at,by}, view, blobUrl? } | { blob, blobUrl, view, name }
+let photoBusy = [false, false];
+let photoPickIdx = -1;
+
+function resetFormPhotos(saved){
+  formPhotos.forEach(s => { if (s && s.blobUrl) { try { URL.revokeObjectURL(s.blobUrl); } catch (e) {} } });
+  formPhotos = [null, null];
+  photoBusy = [false, false];
+  (saved || []).slice(0, 2).forEach((p, i) => { formPhotos[i] = { saved: p, view: '' }; });
+  renderPhotoSlots();
+}
+
+function renderPhotoSlots(){
+  const grid = document.getElementById('photoGrid');
+  if (!grid) return;
+  const on = !!(window.FBL && FBL.photosEnabled);
+  document.getElementById('photoHint').textContent = on
+    ? 'ถ่ายหรือเลือกรูปจากเครื่องได้ ระบบย่อรูปให้อัตโนมัติ (ด้านยาวไม่เกิน 1920 px) แล้วเก็บใน Google Drive ของหมวด · รูปจะถูกอัปโหลดตอนกด "บันทึกข้อมูล"'
+    : 'ยังไม่ได้ตั้งค่าที่เก็บรูป (Google Drive) — ผู้ดูแลระบบดูวิธีตั้งค่าในคู่มือติดตั้ง ส่วนอื่นของระบบใช้งานได้ตามปกติ';
+  grid.innerHTML = [0, 1].map(i => {
+    const s = formPhotos[i];
+    let body;
+    if (photoBusy[i]) {
+      body = '<div class="ph-empty">กำลังย่อรูป…</div>';
+    } else if (s) {
+      const note = s.blob ? ('รูปใหม่ ' + Math.round(s.blob.size / 1024) + ' KB · ยังไม่ได้บันทึก') : (s.blobUrl ? 'อัปโหลดแล้ว' : 'บันทึกแล้ว');
+      body = `<div class="ph-img" data-ph-img="${i}"${s.view ? ` style="background-image:url('${s.view}')"` : ''}>${s.view ? '' : 'กำลังโหลดรูป…'}</div>
+        <div class="ph-bar"><span>${note}</span>
+          <button type="button" class="btn btn-outline btn-sm" data-ph-pick="${i}"${on ? '' : ' disabled'}>เปลี่ยนรูป</button>
+          <button type="button" class="btn btn-outline btn-sm" data-ph-del="${i}">เอาออก</button></div>`;
+    } else {
+      body = `<button type="button" class="ph-empty ph-add" data-ph-pick="${i}"${on ? '' : ' disabled'}>＋ ถ่าย / เลือกรูป</button>`;
+    }
+    return `<div class="ph-slot"><div class="ph-title">${escapeHtml('รูปที่ ' + (i + 1) + ' · ' + PHOTO_SLOT_LABELS[i])}</div>${body}</div>`;
+  }).join('');
+  grid.querySelectorAll('[data-ph-pick]').forEach(b => { b.onclick = () => { photoPickIdx = +b.dataset.phPick; document.getElementById('photoFile').click(); }; });
+  grid.querySelectorAll('[data-ph-del]').forEach(b => { b.onclick = () => {
+    const i = +b.dataset.phDel, s = formPhotos[i];
+    if (s && s.blobUrl) { try { URL.revokeObjectURL(s.blobUrl); } catch (e) {} }
+    formPhotos[i] = null; renderPhotoSlots();
+  }; });
+  // รูปที่บันทึกไว้แล้ว: โหลดมาแสดง
+  formPhotos.forEach((s, i) => {
+    if (!s || !s.saved || s.view || s.loading || !on) return;
+    s.loading = true;
+    FBL.photoUrl(s.saved.path).then(u => {
+      s.loading = false;
+      if (formPhotos[i] !== s) return;
+      const el = grid.querySelector('[data-ph-img="' + i + '"]');
+      if (!el) return;
+      if (u) { s.view = u; el.style.backgroundImage = 'url("' + u + '")'; el.textContent = ''; }
+      else el.textContent = 'โหลดรูปไม่ได้';
+    });
+  });
+}
+
+async function onPhotoFilePicked(ev){
+  const f = ev.target.files && ev.target.files[0];
+  const i = photoPickIdx;
+  ev.target.value = '';
+  if (!f || i < 0) return;
+  photoBusy[i] = true; renderPhotoSlots();
+  try {
+    const blob = await FBL.compressPhoto(f);
+    const old = formPhotos[i];
+    if (old && old.blobUrl) { try { URL.revokeObjectURL(old.blobUrl); } catch (e) {} }
+    const url = URL.createObjectURL(blob);
+    formPhotos[i] = { blob, blobUrl: url, view: url, name: f.name };
+  } catch (e) { showToast(e && e.message ? e.message : 'เลือกรูปไม่สำเร็จ'); }
+  photoBusy[i] = false; renderPhotoSlots();
+}
+(function(){ const f = document.getElementById('photoFile'); if (f) f.addEventListener('change', onPhotoFilePicked); })();
+setTimeout(renderPhotoSlots, 0);
+
+function setSaveButtonText(text){
+  const btn = document.getElementById('btnSave');
+  if (btn && btn.classList.contains('btn-loading')) btn.innerHTML = '<span class="btn-spinner"></span>' + text;
+}
+// อัปโหลดรูปใหม่ในฟอร์ม แล้วคืนรายการรูปทั้งหมดของเคส (โยนข้อผิดพลาดถ้าอัปโหลดไม่สำเร็จ → ไม่บันทึกเคส)
+async function commitFormPhotos(caseId, fiscalYear){
+  const kept = [];
+  const total = formPhotos.filter(s => s && s.blob).length;
+  let n = 0;
+  for (const s of formPhotos) {
+    if (!s) continue;
+    if (!s.saved) {
+      n++;
+      setSaveButtonText('กำลังอัปโหลดรูป ' + n + '/' + total + '…');
+      s.saved = await FBL.uploadPhoto(fiscalYear, caseId, s.blob);
+      s.blob = null;   // อัปโหลดแล้ว — ถ้าบันทึกเคสไม่สำเร็จแล้วกดซ้ำ จะไม่อัปโหลดซ้ำ
+    }
+    kept.push(s.saved);
+  }
+  if (total) setSaveButtonText('กำลังบันทึก...');
+  return kept;
+}
+// หลังบันทึกเคสสำเร็จ: รูปเดิมที่ถูกเอาออก/เปลี่ยน → ลบไฟล์ใน Drive (เฉพาะเจ้าของ/ผู้ดูแลระบบ; คนอื่นไฟล์ยังอยู่ใน Drive แต่ไม่แสดงในเคสแล้ว)
+function finishPhotoCleanup(oldPaths, newPhotos){
+  const keep = new Set((newPhotos || []).map(p => p.path));
+  const gone = (oldPaths || []).filter(p => !keep.has(p));
+  if (gone.length && window.FBL && FBL.deletePhotoFiles) FBL.deletePhotoFiles(gone);
+}
+
+// การ์ด "รูปถ่าย" ในหน้าต่างรายละเอียดเคส
+function casePhotosCardHtml(rec){
+  const ph = FBL.photosOf(rec);
+  if (!ph.length && !FBL.photosEnabled) return '';
+  const body = ph.length
+    ? `<div class="cd-photos">${ph.map((p, i) => `<div class="cd-photo" data-cdph="${i}" title="กดเพื่อดูรูปขยาย"><span>กำลังโหลดรูป…</span></div>`).join('')}</div>`
+    : '<p class="hint" style="text-align:center;padding:8px 0">ยังไม่มีรูปถ่าย</p>';
+  return `<div class="cd-card"><div class="cd-sec">รูปถ่าย <span class="cd-count">${ph.length} รูป</span></div>${body}</div>`;
+}
+function hydrateCasePhotos(rec){
+  FBL.photosOf(rec).forEach((p, i) => {
+    const el = document.querySelector('[data-cdph="' + i + '"]');
+    if (!el) return;
+    FBL.photoUrl(p.path).then(u => {
+      if (!document.body.contains(el)) return;
+      if (!u) { el.innerHTML = '<span>โหลดรูปไม่ได้</span>'; return; }
+      el.innerHTML = ''; el.style.backgroundImage = 'url("' + u + '")';
+      el.onclick = () => openPhotoLightbox(u, 'รูปที่ ' + (i + 1) + ' ' + (PHOTO_SLOT_LABELS[i] || ''));
+    });
+  });
+}
+function openPhotoLightbox(url, title){
+  const old = document.getElementById('photoLightbox');
+  if (old) old.remove();
+  const d = document.createElement('div');
+  d.id = 'photoLightbox'; d.className = 'ph-lightbox';
+  d.innerHTML = `<div class="ph-lb-bar"><span>${escapeHtml(title)}</span><a href="${url}" download="${escapeHtml(title)}.jpg" class="btn btn-outline btn-sm">ดาวน์โหลด</a><button type="button" class="btn btn-primary btn-sm" id="phLbClose">ปิด</button></div><img src="${url}" alt="">`;
+  const onKey = ev => { if (ev.key === 'Escape') close(); };
+  const close = () => { d.remove(); document.removeEventListener('keydown', onKey); };
+  d.addEventListener('click', ev => { if (ev.target === d || ev.target.tagName === 'IMG') close(); });
+  d.querySelector('#phLbClose').onclick = close;
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(d);
+}
+
 function clearForm(){
   editingId = null;
+  if (window.DRAFTS) DRAFTS.clearPending();
+  resetFormPhotos([]);
   editBaseUpdatedAt = null;
   document.getElementById('editingHint').textContent = '';
   document.getElementById('editModeBanner').style.display = 'none';
@@ -3355,6 +3560,8 @@ function clearForm(){
 
 function loadRecordIntoForm(rec){
   editingId = rec.id;
+  if (window.DRAFTS) DRAFTS.clearPending();
+  resetFormPhotos(FBL.photosOf(rec));
   editBaseUpdatedAt = rec.updatedAt || '';
   // ใช้เลขที่รายการแบบ "ปีงบ-ลำดับ" (เช่น 2569-15) แทน id ภายในระบบ (r-xxxxx) ที่ผู้ใช้อ่านไม่รู้เรื่อง
   const seqMap = computeSeqMap();
@@ -3369,7 +3576,11 @@ function loadRecordIntoForm(rec){
   document.getElementById('f_fiscalYear').value = rec.fiscalYear || thaiFiscalYearNow();
   document.getElementById('f_dateIncident').value = rec.dateIncident || '';
   document.getElementById('f_dateFound').value = rec.dateFound || '';
-  document.getElementById('f_time').value = rec.time || '';
+  // ข้อมูลเก่าเป็นข้อความอิสระ (เช่น "14.30 น.") — แปลงเป็น HH:MM ให้ช่องเลือกเวลาแสดงได้
+  (function () {
+    const m = String(rec.time || '').match(/(\d{1,2})\s*[:.]\s*(\d{2})/);
+    document.getElementById('f_time').value = m && +m[1] < 24 && +m[2] < 60 ? m[1].padStart(2, '0') + ':' + m[2] : '';
+  })();
   ensureHighwayOption(rec.highway); // เคสบนสายทางที่โอนแล้ว ต้องมีตัวเลือกนี้ชั่วคราวตอนแก้ไข
   document.getElementById('f_highway').value = rec.highway || '';
   document.getElementById('f_section').value = rec.section || highwaySection(rec.highway);
@@ -3530,6 +3741,10 @@ async function saveForm(){
   };
 
   setSaveButtonLoading(true);
+  const prevRecForPhotos = editingId ? records.find(r => r.id === editingId) : null;
+  const prevPhotoPaths = FBL.photosOf(prevRecForPhotos).map(p => p.path);
+  try { rec.photos = await commitFormPhotos(rec.id, rec.fiscalYear); }
+  catch (e) { setSaveButtonLoading(false); showToast('อัปโหลดรูปไม่สำเร็จ: ' + (e && e.message ? e.message : e) + ' — ยังไม่ได้บันทึกเคส กดบันทึกอีกครั้งได้'); return; }
   let saved;
   if (editingId) {
     const idx = records.findIndex(r => r.id === editingId);
@@ -3556,6 +3771,8 @@ async function saveForm(){
   setSaveButtonLoading(false);
   // บันทึกไม่สำเร็จ (เช่น สัญญาณหลุด/ไม่มีสิทธิ์): คงข้อมูลในฟอร์มไว้ให้กดบันทึกซ้ำได้ ไม่แสดง "บันทึกสำเร็จ" หลอก
   if (!saved) { renderTable(); return; }
+  finishPhotoCleanup(prevPhotoPaths, rec.photos);
+  if (window.DRAFTS) await DRAFTS.afterCaseSaved(rec, !editingId);   // ผูกกับรายการร่าง / สร้างร่างอัตโนมัติ (ต้องเรียกก่อน clearForm)
   showSaveSuccessModal(!!editingId, rec);
   clearForm();
   populateYearFilter();
@@ -3728,6 +3945,7 @@ async function startApp(){
     populateHighwaySelect();
     populateYearFilter();
     updateWhoDisplay();
+    initDrafts();
   } catch (e) {
     console.error('startApp failed', e);
     showToast('โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชหน้านี้');
@@ -3738,6 +3956,37 @@ async function startApp(){
   renderRoutesTable();
   renderDashboard();
   startPresenceTracking();
+}
+
+/* ============ ตาราง "รายการร่าง" (drafts.js) — ติดตามเรื่องที่เพิ่งเกิดจนส่งเอกสารถึงแขวง ============ */
+function initDrafts(){
+  if (!window.DRAFTS) return;
+  DRAFTS.init({
+    sys: 'accident', startLabel: 'วันเกิดเหตุ', caseCol: 'accidents',
+    startOf: c => c.dateIncident, sentOf: c => c.sentToDistrictDate, doneOf: c => !!normalizeDateStr(c.closedDate),
+    highways: () => ROUTES.filter(isRouteActive).map(r => ({ value: r.highway, label: r.highway + (r.section ? ' (' + r.section + ')' : '') })),
+    parseKm: parseKm,
+    openNew: prefillFormFromDraft,
+    openCase: id => { const rec = records.find(r => r.id === id); if (rec) loadRecordIntoForm(rec); else showToast('ไม่พบเคสนี้ (อาจถูกลบ)'); }
+  });
+  DRAFTS.start();
+  DRAFTS.render();
+}
+// กดปุ่ม "บันทึกเคส" ที่ร่าง → ฟอร์มเปิดใหม่พร้อมวันที่ / ทล. / กม. (เขตพื้นที่ต่างๆ เติมให้เองตามเดิม)
+function prefillFormFromDraft(p){
+  clearForm();
+  document.getElementById('f_dateIncident').value = p.startDate || '';
+  syncFiscalYearFromDate();
+  ensureHighwayOption(p.highway);
+  document.getElementById('f_highway').value = p.highway || '';
+  document.getElementById('f_section').value = highwaySection(p.highway);
+  document.getElementById('f_km').value = formatKm(p.km);
+  updateKmHint();
+  updateHighwayHint();
+  updateZoneFields();
+  const sec = document.getElementById('fsec1');
+  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast('ดึงข้อมูลจากรายการร่างแล้ว กรอกรายละเอียดต่อและกดบันทึก');
 }
 
 /* ============ นำเข้าข้อมูลจากไฟล์ Excel ของระบบเดิม (เจ้าของระบบ ครั้งเดียว) ============ */
@@ -4242,6 +4491,146 @@ function caseDetailPersonHtml(p, label, extraRows){
 }
 
 // หน้าต่างรายละเอียดเคส (แบบ ข): หัวสีกรมท่า → แผ่นสถานะ 4 ช่อง → การ์ดข้อมูล/ผู้ละเมิด + รายการทรัพย์สินพร้อมใบสรุปเงิน → ปุ่มตรึงด้านล่าง
+/* ============ คัดลอกหน้าต่างรายละเอียดเคสเป็น "รูปเดียว" เพื่อวางใน LINE ============
+   - สร้างรูปจากสำเนาของหน้าต่างรายละเอียด จัดเป็นแนวนอน (แบบ 5) กว้าง 1100 px ความละเอียด 2 เท่า:
+       แถวบน = สถานะ 4 ช่อง · ซ้าย = รูปถ่าย + ข้อมูลอุบัติเหตุ/อ้างอิง + ผู้ละเมิด · ขวา = รายการทรัพย์สินครบทุกรายการ (2 คอลัมน์) + ยอดรวม
+   - แสดงรายการทรัพย์สินครบทุกรายการ ไม่มีแถบเลื่อน · ตัด "เบอร์โทร" ออกเสมอ
+   - ไม่ติดปุ่ม ลบรายการ / ปิด / แก้ไขรายการ / ส่งไปทำใบสั่งการ / × และปุ่มคัดลอกเอง
+   - ท้ายรูปมีบรรทัดเล็กๆ บอกที่มาและเวลาที่คัดลอก
+   - คัดลอกลงคลิปบอร์ดโดยตรง (วางใน LINE ด้วย Ctrl+V) ถ้าเบราว์เซอร์ไม่อนุญาต จะบันทึกเป็นไฟล์ .png ให้แทน
+   - ใช้ไลบรารี html2canvas (โหลดตอนกดปุ่มครั้งแรกเท่านั้น ไม่ทำให้หน้าเว็บช้าลง) */
+const HTML2CANVAS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+function loadScriptOnce(src){
+  return new Promise((resolve, reject) => {
+    if (window.html2canvas) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('โหลดตัวสร้างรูปไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'));
+    document.head.appendChild(s);
+  });
+}
+// รอให้รูปถ่ายในการ์ด "รูปถ่าย" โหลดเสร็จก่อนสร้างรูป (สูงสุด 8 วินาที)
+async function waitCasePhotosReady(){
+  for (let i = 0; i < 40; i++) {
+    const loading = [...document.querySelectorAll('#modalRoot .cd-photo')].some(e => !e.style.backgroundImage && /กำลังโหลด/.test(e.textContent));
+    if (!loading) return;
+    await new Promise(r => setTimeout(r, 200));
+  }
+}
+// จัด "หัวข้อ–ค่า" เป็นคู่ 2 ชุดต่อบรรทัด · ค่ายาว (เกิน 24 ตัวอักษร) ไปอยู่ท้ายการ์ดแบบเต็มบรรทัด
+function snapPairify(dls){
+  const pairs = [];
+  dls.forEach(dl => { const ch = [...dl.children]; for (let i = 0; i + 1 < ch.length; i += 2) pairs.push([ch[i], ch[i + 1]]); });
+  const short = pairs.filter(p => p[1].textContent.trim().length <= 24);
+  const long = pairs.filter(p => p[1].textContent.trim().length > 24);
+  const wide = document.createElement('dl');
+  wide.className = 'cd-dl wide';
+  short.forEach(p => wide.append(p[0], p[1]));
+  if (short.length % 2) wide.append(document.createElement('dt'), document.createElement('dd'));
+  long.forEach(p => { p[0].style.gridColumn = '1'; p[1].classList.add('full'); wide.append(p[0], p[1]); });
+  return wide;
+}
+async function buildCaseImage(){
+  const src = document.querySelector('#modalRoot .modal.case-modal');
+  if (!src) throw new Error('ไม่พบหน้าต่างรายละเอียดเคส');
+  await loadScriptOnce(HTML2CANVAS_URL);
+  await waitCasePhotosReady();
+  const clone = src.cloneNode(true);
+  clone.querySelectorAll('.cd-foot,.cd-hd-actions,.modal-close').forEach(e => e.remove());
+  // ตัดเบอร์โทรออกเสมอ (แถว "โทร" ทั้งของผู้ละเมิดหลักและคู่กรณี)
+  clone.querySelectorAll('.cd-dl').forEach(dl => {
+    [...dl.querySelectorAll('dt')].forEach(dt => {
+      if (dt.textContent.trim() === 'โทร') { const dd = dt.nextElementSibling; dt.remove(); if (dd && dd.tagName === 'DD') dd.remove(); }
+    });
+  });
+  const mk = (cls, kids) => { const d = document.createElement('div'); if (cls) d.className = cls; (kids || []).forEach(k => k && d.appendChild(k)); return d; };
+  const hd = clone.querySelector('.cd-hd');
+  const tiles = clone.querySelector('.cd-tiles');
+  const cards = [...clone.querySelectorAll('.cd-card')];
+  const by = re => cards.find(c => { const s = c.querySelector('.cd-sec'); return s && re.test(s.textContent); });
+  const cInfo = by(/ข้อมูลอุบัติเหตุ/), cPerson = by(/ผู้ละเมิด/), cRef = by(/อ้างอิง/), cPhoto = by(/รูปถ่าย/), cItems = by(/ทรัพย์สิน/);
+  const known = new Set([cInfo, cPerson, cRef, cPhoto, cItems]);
+  const extra = cards.filter(c => !known.has(c));   // การ์ดอื่นที่อาจเพิ่มในอนาคต → ต่อท้ายคอลัมน์ซ้าย
+
+  // การ์ดรวม "ข้อมูลอุบัติเหตุและอ้างอิง"
+  let merged = null;
+  const mDls = [cInfo, cRef].filter(Boolean).flatMap(c => [...c.querySelectorAll('.cd-dl')]);
+  if (mDls.length) {
+    merged = mk('cd-card', []);
+    const t = document.createElement('div'); t.className = 'cd-sec'; t.textContent = 'ข้อมูลอุบัติเหตุและอ้างอิง';
+    merged.appendChild(t); merged.appendChild(snapPairify(mDls));
+  }
+  if (cPerson) [...cPerson.querySelectorAll('.cd-dl')].forEach(dl => dl.replaceWith(snapPairify([dl])));
+  // รายการทรัพย์สิน 2 คอลัมน์
+  if (cItems) {
+    const items = [...cItems.querySelectorAll('.cd-item')];
+    const receipt = cItems.querySelector('.cd-receipt');
+    const sec = cItems.querySelector('.cd-sec');
+    const half = Math.ceil(items.length / 2);
+    const list = mk('snap-items2', [mk('', items.slice(0, half)), mk('', items.slice(half))]);
+    cItems.innerHTML = '';
+    if (sec) cItems.appendChild(sec);
+    cItems.appendChild(list);
+    if (receipt) cItems.appendChild(receipt);
+  }
+  const grid = mk('snap-grid', [mk('snap-col', [cPhoto, merged, cPerson, ...extra]), mk('snap-col', [cItems])]);
+  grid.style.gridTemplateColumns = '1fr 1.25fr';
+
+  const shell = document.createElement('div');
+  shell.className = 'modal case-modal snap';
+  const body = document.createElement('div');
+  body.className = 'modal-body';
+  body.appendChild(mk('snap-col', [tiles, grid]));
+  const stamp = document.createElement('div');
+  stamp.className = 'snap-stamp';
+  stamp.textContent = 'ระบบงานอุบัติเหตุ · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) + ' น.';
+  shell.append(hd, body, stamp);
+
+  const stage = document.createElement('div');
+  stage.className = 'cd-snap-stage';
+  stage.appendChild(shell);
+  document.body.appendChild(stage);
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const canvas = await window.html2canvas(shell, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false, windowWidth: 1100 });
+    return await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('สร้างรูปไม่สำเร็จ')), 'image/png'));
+  } finally { stage.remove(); }
+}
+async function copyCaseDetailAsImage(rec, btn){
+  const label = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ <span>กำลังสร้างรูป…</span>';
+  try {
+    const blobPromise = buildCaseImage();
+    let copied = false;
+    // ส่ง Promise เข้าคลิปบอร์ดทันที (ต้องทำในจังหวะที่ผู้ใช้กดปุ่ม) — ไม่รองรับ/ไม่อนุญาต → บันทึกเป็นไฟล์แทน
+    if (navigator.clipboard && window.ClipboardItem) {
+      try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blobPromise })]); copied = true; } catch (e) { copied = false; }
+    }
+    const blob = await blobPromise;
+    if (copied) {
+      btn.classList.add('ok');
+      btn.innerHTML = '✓ <span>คัดลอกแล้ว</span>';
+      showToast('คัดลอกรูปแล้ว — เปิด LINE แล้วกด Ctrl+V เพื่อวาง (มือถือ: กดค้างที่ช่องพิมพ์ → วาง)');
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'อุบัติเหตุ-' + String(rec.fiscalYear || '') + '-' + String(rec.id || '').slice(-6) + '.png';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      btn.innerHTML = '✓ <span>บันทึกไฟล์แล้ว</span>';
+      showToast('เบราว์เซอร์นี้คัดลอกรูปอัตโนมัติไม่ได้ จึงบันทึกเป็นไฟล์รูปให้แทน — ส่งไฟล์เข้า LINE ได้เลย');
+    }
+  } catch (e) {
+    console.error('copy image failed', e);
+    btn.innerHTML = label;
+    showToast('สร้างรูปไม่สำเร็จ: ' + (e && e.message ? e.message : e));
+  } finally {
+    setTimeout(() => { btn.disabled = false; btn.classList.remove('ok'); btn.innerHTML = label; }, 2500);
+  }
+}
+
 function openCaseDetailModal(id){
   const rec = records.find(r => r.id === id);
   if (!rec) return;
@@ -4299,7 +4688,7 @@ function openCaseDetailModal(id){
             <h3>${escapeHtml(caseNo)} <span class="cd-dt">· ${escapeHtml(formatThaiDate(rec.dateIncident))}${rec.time ? ' · ' + escapeHtml(String(rec.time).replace(/\s*น\.?$/, '')) + ' น.' : ''}</span></h3>
             <div class="cd-loc">📍 ทล.${escapeHtml(rec.highway)} ตอน ${escapeHtml(rec.section)} · กม.${escapeHtml(formatKm(rec.km))}</div>
           </div>
-          <button class="modal-close" id="caseDetailCloseX" type="button">×</button>
+          <div class="cd-hd-actions"><button class="cd-copy" id="caseDetailCopy" type="button" title="คัดลอกรายละเอียดเคสเป็นรูปเดียว แล้ววางใน LINE (ไม่รวมเบอร์โทร)">📋 <span>คัดลอกเป็นรูป</span></button><button class="modal-close" id="caseDetailCloseX" type="button">×</button></div>
         </div>
         <div class="modal-body">
           ${tilesHtml}
@@ -4328,6 +4717,7 @@ function openCaseDetailModal(id){
                 </dl></div>
             </div>
             <div>
+              ${casePhotosCardHtml(rec)}
               <div class="cd-card"><div class="cd-sec">รายการทรัพย์สินเสียหาย <span class="cd-count">${items.length} รายการ</span></div>
                 ${itemsHtml}${receiptHtml}</div>
             </div>
@@ -4342,6 +4732,8 @@ function openCaseDetailModal(id){
       </div>
     </div>`;
 
+  hydrateCasePhotos(rec);
+  document.getElementById('caseDetailCopy').onclick = (e) => copyCaseDetailAsImage(rec, e.currentTarget);
   document.getElementById('caseDetailCloseX').onclick = () => { root.innerHTML = ''; };
   document.getElementById('caseDetailClose').onclick = () => { root.innerHTML = ''; };
   document.getElementById('caseDetailEdit').onclick = () => {
