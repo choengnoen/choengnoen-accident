@@ -896,13 +896,17 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .ph-lightbox img{max-width:100%;max-height:calc(100vh - 90px);object-fit:contain;border-radius:8px;cursor:zoom-out}
 .ph-lb-bar{display:flex;gap:10px;align-items:center;color:#fff;font-size:14px}
 .ph-lb-bar .btn-outline{background:#fff;color:#182430;border-color:#fff;text-decoration:none}
-/* ===== ปุ่ม "คัดลอกเป็นรูป" ในหัวหน้าต่างรายละเอียดเคส + ชุดสไตล์ของรูปที่ใช้วางใน LINE (แบบ 5 แนวนอน) ===== */
+/* ===== ปุ่มไอคอน "คัดลอกเป็นรูป" + ปุ่ม × ในหัวหน้าต่างรายละเอียดเคส (วงกลมเทาอ่อน ไอคอนเส้นเรียบ) ===== */
 .cd-hd-actions{display:flex;align-items:center;gap:8px;flex:none}
-.cd-copy{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:7px 14px;background:#ffffff26;color:#fff;font:600 13.5px 'Sarabun',sans-serif;cursor:pointer;white-space:nowrap}
-.cd-copy:hover{background:#fff;color:var(--navy-900)}
-.cd-copy:disabled{opacity:.8;cursor:wait}
-.cd-copy.ok{background:var(--green);color:#fff}
-@media(max-width:560px){.cd-copy span{display:none}}
+.cd-copy,.case-modal .cd-hd .modal-close{width:40px;height:40px;border:0;border-radius:50%;padding:0;display:inline-grid;place-items:center;background:#eef0f6;color:#2b3445;cursor:pointer;transition:background .15s,color .15s,transform .1s}
+.cd-copy:hover,.case-modal .cd-hd .modal-close:hover{background:#fff;color:#2b3445}
+.cd-copy:active,.case-modal .cd-hd .modal-close:active{transform:scale(.94)}
+.case-modal .cd-hd .modal-close{font-size:22px;line-height:1}
+.cd-copy svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.cd-copy:disabled{cursor:wait}
+.cd-copy.ok,.cd-copy.ok:hover{background:#d7f0e1;color:#1c8a53}
+.cd-copy-spin{width:18px;height:18px;border-radius:50%;border:2px solid rgba(43,52,69,.25);border-top-color:#2b3445;animation:cdCopySpin .8s linear infinite}
+@keyframes cdCopySpin{to{transform:rotate(360deg)}}
 .cd-snap-stage{position:fixed;left:-12000px;top:0;z-index:-1;width:auto}
 .cd-snap-stage .snap{display:block;width:1100px;max-width:none;max-height:none;overflow:visible;animation:none;box-shadow:none;border-radius:0;padding:0}
 .cd-snap-stage .snap .modal-body{overflow:visible;max-height:none;margin:0;padding:12px 14px}
@@ -4597,10 +4601,16 @@ async function buildCaseImage(){
     return await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('สร้างรูปไม่สำเร็จ')), 'image/png'));
   } finally { stage.remove(); }
 }
+const SNAP_ICON = {
+  copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+  check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  spin: '<span class="cd-copy-spin"></span>'
+};
+const SNAP_FILE_PREFIX = 'อุบัติเหตุ';
 async function copyCaseDetailAsImage(rec, btn){
-  const label = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '⏳ <span>กำลังสร้างรูป…</span>';
+  btn.innerHTML = SNAP_ICON.spin;
+  btn.title = 'กำลังสร้างรูป…';
   try {
     const blobPromise = buildCaseImage();
     let copied = false;
@@ -4609,25 +4619,27 @@ async function copyCaseDetailAsImage(rec, btn){
       try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blobPromise })]); copied = true; } catch (e) { copied = false; }
     }
     const blob = await blobPromise;
+    btn.classList.add('ok');
+    btn.innerHTML = SNAP_ICON.check;
     if (copied) {
-      btn.classList.add('ok');
-      btn.innerHTML = '✓ <span>คัดลอกแล้ว</span>';
+      btn.title = 'คัดลอกแล้ว';
       showToast('คัดลอกรูปแล้ว — เปิด LINE แล้วกด Ctrl+V เพื่อวาง (มือถือ: กดค้างที่ช่องพิมพ์ → วาง)');
     } else {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'อุบัติเหตุ-' + String(rec.fiscalYear || '') + '-' + String(rec.id || '').slice(-6) + '.png';
+      a.download = SNAP_FILE_PREFIX + '-' + String(rec.fiscalYear || '') + '-' + String(rec.id || '').slice(-6) + '.png';
       document.body.appendChild(a); a.click();
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
-      btn.innerHTML = '✓ <span>บันทึกไฟล์แล้ว</span>';
+      btn.title = 'บันทึกไฟล์แล้ว';
       showToast('เบราว์เซอร์นี้คัดลอกรูปอัตโนมัติไม่ได้ จึงบันทึกเป็นไฟล์รูปให้แทน — ส่งไฟล์เข้า LINE ได้เลย');
     }
   } catch (e) {
     console.error('copy image failed', e);
-    btn.innerHTML = label;
+    btn.innerHTML = SNAP_ICON.copy;
+    btn.title = 'คัดลอกเป็นรูป';
     showToast('สร้างรูปไม่สำเร็จ: ' + (e && e.message ? e.message : e));
   } finally {
-    setTimeout(() => { btn.disabled = false; btn.classList.remove('ok'); btn.innerHTML = label; }, 2500);
+    setTimeout(() => { btn.disabled = false; btn.classList.remove('ok'); btn.innerHTML = SNAP_ICON.copy; btn.title = 'คัดลอกเป็นรูป'; }, 2500);
   }
 }
 
@@ -4688,7 +4700,7 @@ function openCaseDetailModal(id){
             <h3>${escapeHtml(caseNo)} <span class="cd-dt">· ${escapeHtml(formatThaiDate(rec.dateIncident))}${rec.time ? ' · ' + escapeHtml(String(rec.time).replace(/\s*น\.?$/, '')) + ' น.' : ''}</span></h3>
             <div class="cd-loc">📍 ทล.${escapeHtml(rec.highway)} ตอน ${escapeHtml(rec.section)} · กม.${escapeHtml(formatKm(rec.km))}</div>
           </div>
-          <div class="cd-hd-actions"><button class="cd-copy" id="caseDetailCopy" type="button" title="คัดลอกรายละเอียดเคสเป็นรูปเดียว แล้ววางใน LINE (ไม่รวมเบอร์โทร)">📋 <span>คัดลอกเป็นรูป</span></button><button class="modal-close" id="caseDetailCloseX" type="button">×</button></div>
+          <div class="cd-hd-actions"><button class="cd-copy" id="caseDetailCopy" type="button" title="คัดลอกเป็นรูป" aria-label="คัดลอกเป็นรูป"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button><button class="modal-close" id="caseDetailCloseX" type="button">×</button></div>
         </div>
         <div class="modal-body">
           ${tilesHtml}
