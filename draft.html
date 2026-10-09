@@ -14,18 +14,21 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Prompt','L
 .top .ic{width:44px;height:44px;border-radius:50%;background:#fff;color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
 .top h1{margin:0;font-size:21px;font-weight:600;line-height:1.2}
 .top p{margin:2px 0 0;font-size:13px;opacity:.9}
+.top p:empty{display:none}
 .card{background:#fff;margin:14px 14px 0;border-radius:16px;padding:16px;border:1px solid var(--line)}
 label{display:block;font-size:14px;font-weight:500;color:var(--mut);margin:0 0 6px}
 .f{margin-bottom:16px}
 .f:last-child{margin-bottom:0}
-input,select{width:100%;height:50px;font:inherit;font-size:17px;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:0 14px;background:#fff;appearance:none;-webkit-appearance:none}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%235B6B82' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
-input:focus,select:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px var(--ac2)}
-input,select{min-width:0;max-width:100%}
-.km{display:flex;align-items:center;gap:10px}
-.km>div{min-width:0}
-.km span{font-size:22px;color:var(--mut);font-weight:500}
-.km .u{font-size:13px;color:var(--mut);margin-top:4px}
+input{width:100%;min-width:0;max-width:100%;height:50px;font:inherit;font-size:17px;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:0 14px;background:#fff;appearance:none;-webkit-appearance:none}
+input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px var(--ac2)}
+.hint{font-size:13px;color:var(--mut);margin-top:6px;min-height:18px}
+.hw{display:flex;flex-direction:column;gap:6px}
+.hwrow{display:flex;align-items:center;gap:8px;width:100%;height:46px;padding:0 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:16px;color:var(--ink);text-align:left;white-space:nowrap;overflow:hidden}
+.hwrow b{font-weight:600;flex:none}
+.hwrow span{color:var(--mut);overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.hwrow.on{border-color:var(--ac);background:var(--ac2)}
+.hwrow.on span{color:var(--ink)}
+.hwrow.on::after{content:'✓';color:var(--ac);font-weight:600;flex:none}
 .due{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--ac2);color:var(--ink);font-size:15px;line-height:1.5}
 .due b{font-weight:600}
 .err{margin-top:12px;color:#B3261E;font-size:14px;min-height:20px}
@@ -39,22 +42,37 @@ button.ghost{width:100%;height:50px;border:1.5px solid var(--line);border-radius
 .ok h2{margin:0 0 6px;font-size:21px}
 .ok p{margin:4px 0;color:var(--mut);line-height:1.6}
 .ok .sum{margin:14px 0 4px;padding:12px;border-radius:12px;background:var(--bg);color:var(--ink);white-space:pre-line;text-align:left;line-height:1.7}
-.hint{font-size:13px;color:var(--mut);margin-top:6px}
 .setup{margin:14px;padding:16px;border-radius:14px;background:#FAEEDA;color:#633806;line-height:1.7}
+.load{padding:34px 16px;text-align:center;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 14px 0}
+.chip{display:inline-block;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.chip.g{background:#E1F5EE;color:#085041}.chip.y{background:#FAEEDA;color:#633806}.chip.r{background:#FCEBEB;color:#791F1F}.chip.n{background:#E9ECF1;color:#444}
+.sec{margin:14px 14px 0;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.sec .sh{display:flex;align-items:center;gap:8px;padding:10px 14px;font-weight:600;border-bottom:1px solid var(--line);border-left:6px solid var(--sc,#888)}
+.sec .sh .open{margin-left:auto;font-size:13px;font-weight:500;color:var(--mut);background:none;border:none;font-family:inherit;padding:4px 0}
+.row{padding:11px 14px;border-bottom:1px solid #EEF0F4}
+.row:last-child{border-bottom:none}
+.row .l1{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.row .l1 b{font-weight:600;font-size:16px}
+.row .l2{font-size:13px;color:var(--mut);margin-top:3px}
+.row .l3{font-size:14px;margin-top:4px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.none{padding:14px;color:var(--mut);font-size:14px}
+.acts{margin:14px 14px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="ic" id="icon">▤</div><div><h1 id="title">บันทึกรายการร่าง</h1><p id="sub">กำลังเตรียมฟอร์ม…</p></div></div>
+  <div class="top" id="top"><div class="ic" id="icon">▤</div><div><h1 id="title">บันทึกรายการร่าง</h1><p id="sub"></p></div></div>
   <div id="root"></div>
 </div>
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 /* ==========================================================================
-   draft.html — ฟอร์มบันทึก "รายการร่าง" เปิดในจอ LINE (LIFF) จากเมนูภาพ
-   ใช้ไฟล์เดียวกันทั้ง 4 งาน แยกด้วย ?sys=accident | theft | boundary | permit
-   ต้องตั้ง 2 ค่านี้ก่อนอัปโหลด (ดูคู่มือ "ร่างอุบัติเหตุ" ขั้น LIFF):
+   draft.html — หน้าในจอ LINE (LIFF) เปิดจากเมนูภาพ ใช้ไฟล์เดียวกันทุกปุ่ม แยกด้วย ?sys=
+     accident | theft | boundary | permit   ฟอร์มบันทึกรายการร่างของงานนั้น
+     all                                      งานค้างทั้งหมด (รายการร่างของทุกงาน อ่านอย่างเดียว)
+     complaints                               คำร้องทุกข์ที่ยังไม่เสร็จ (อ่านอย่างเดียว)
+   ต้องตั้ง 2 ค่านี้ก่อนอัปโหลด (ดูคู่มือ "รายการร่าง" ขั้น ข):
      LIFF_ID  = LIFF ID ของแอป LIFF (ในช่องทาง LINE Login)
      API_URL  = URL Web app (ลงท้าย /exec) ของ Apps Script "แจ้งเตือน LINE หมวดเชิงเนิน"
    ========================================================================== */
@@ -62,19 +80,29 @@ var LIFF_ID = '2011953540-cBcN0MIp';
 var API_URL = 'https://script.google.com/macros/s/AKfycbzrMYylFDzD7CkJvNxBFF1ThrY6jzuDCGUA5At4rPfql9Qcr3frVmCRby6UWRZGMcZ3SQ/exec';
 
 var SYS = {
-  accident: { label: 'อุบัติเหตุ', icon: '🚗', color: '#C8452F', tint: '#FAECE7' },
-  theft:    { label: 'โจรกรรม',   icon: '🔓', color: '#D32F2F', tint: '#FDE8E8' },
-  boundary: { label: 'ชี้แนวเขต', icon: '📍', color: '#2F9BEA', tint: '#E1F2FD' },
-  permit:   { label: 'ขออนุญาต',  icon: '📄', color: '#7B4FD6', tint: '#F1EAFE' }
+  accident:   { label: 'อุบัติเหตุ',     icon: '🚗', color: '#C8452F', tint: '#FAECE7', start: 'วันเกิดเหตุ',  word: 'เกิด' },
+  theft:      { label: 'โจรกรรม',       icon: '🔓', color: '#D32F2F', tint: '#FDE8E8', start: 'วันแจ้งความ', word: 'แจ้งความ' },
+  boundary:   { label: 'ชี้แนวเขต',     icon: '📍', color: '#2F9BEA', tint: '#E1F2FD', start: 'วันชี้แนวเขต', word: 'ชี้แนว' },
+  permit:     { label: 'ขออนุญาต',      icon: '📄', color: '#7B4FD6', tint: '#F1EAFE', start: 'วันรับเรื่อง', word: 'รับเรื่อง' },
+  all:        { label: 'งานค้างทั้งหมด', icon: '📋', color: '#0F6E56', tint: '#E1F5EE' },
+  complaints: { label: 'คำร้องทุกข์',    icon: '💬', color: '#B7791F', tint: '#FFF3D6' }
 };
+// ข้อมูลสำรอง: แสดงฟอร์มได้ทันทีโดยไม่ต้องรอเซิร์ฟเวอร์ (ค่าจริงโหลดตามมาแล้วจำไว้ในเครื่อง)
+var FB_HW = [['3','ระยอง-กะเฉด'],['36','ทับมา-ปลวกเกตุ'],['3139','บ้านแลง-หาดใหญ่'],['3140','ทางเข้าบ้านเพ'],['3143','บ้านค่าย-หนองละลอก'],['3574','บ้านค่าย-ระยอง'],['3575','ทางเข้าบ้านค่าย']];
+var FB_HOL = ['2026-10-13','2026-10-23','2026-12-05','2026-12-07','2026-12-10','2026-12-31','2027-01-01'];
 var MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-var root = document.getElementById('root'), meta = null, hol = {}, limit = 10, sysKey = '', busy = false;
+var CK = 'cn_draft_meta_v2';
+var root = document.getElementById('root');
+var meta = { highways: FB_HW.map(function(h){ return { value: h[0], sec: h[1] }; }), holidays: FB_HOL.slice() };
+var hol = {}, limit = 10, sysKey = '', busy = false, selHw = '', ready = null;
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function pad(n){ return (n < 10 ? '0' : '') + n; }
 function ymd(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-function thDate(s){ var a = s.split('-'); return +a[2] + ' ' + MON[+a[1] - 1] + ' ' + (+a[0] + 543); }
+function thShort(s){ var a = s.split('-'); return +a[2] + ' ' + MON[+a[1] - 1]; }
+function thFull(s){ var a = s.split('-'); return +a[2] + ' ' + MON[+a[1] - 1] + ' ' + (+a[0] + 543); }
+function buildHol(){ hol = {}; (meta.holidays || []).forEach(function(d){ hol[d] = 1; }); }
 function addWork(s, n){
   var a = s.split('-'), d = new Date(+a[0], +a[1] - 1, +a[2]), c = 0;
   while (c < n) { d.setDate(d.getDate() + 1); var w = d.getDay(); if (w !== 0 && w !== 6 && !hol[ymd(d)]) c++; }
@@ -82,102 +110,243 @@ function addWork(s, n){
 }
 function setTheme(k){
   var s = SYS[k]; if (!s) return;
-  document.documentElement.style.setProperty('--ac', s.color);
-  document.documentElement.style.setProperty('--ac2', s.tint);
+  var st = document.documentElement.style;
+  st.setProperty('--ac', s.color); st.setProperty('--ac2', s.tint);
   $('icon').textContent = s.icon; $('icon').style.color = s.color;
-  $('title').textContent = 'ร่าง' + s.label;
-  document.title = 'ร่าง' + s.label;
+  $('title').textContent = k === 'all' || k === 'complaints' ? s.label : 'ร่าง' + s.label;
+  $('sub').textContent = '';
+  document.title = $('title').textContent;
 }
 function setupMsg(t){ root.innerHTML = '<div class="setup">' + t + '</div>'; $('sub').textContent = 'ยังไม่พร้อมใช้งาน'; }
 
-async function api(body){
-  var r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
-  return r.json();
+/* ---------- LINE login (โหลดเบื้องหลัง ไม่ขวางการแสดงหน้า) ---------- */
+function startLiff(){
+  ready = new Promise(function(resolve){
+    var s = document.createElement('script');
+    s.src = 'https://static.line-scdn.net/liff/edge/2/sdk.js';
+    s.onerror = function(){ resolve('โหลด LINE SDK ไม่สำเร็จ ตรวจสัญญาณอินเทอร์เน็ต'); };
+    s.onload = function(){
+      liff.init({ liffId: LIFF_ID }).then(function(){
+        if (!liff.isLoggedIn()) { liff.login(); resolve('กำลังล็อกอิน LINE…'); return; }
+        resolve('ok');
+      }).catch(function(e){ resolve('เปิดฟอร์มไม่สำเร็จ: ' + (e && e.message ? e.message : e)); });
+    };
+    document.head.appendChild(s);
+  });
+}
+function getToken(){
+  return ready.then(function(r){
+    if (r !== 'ok') throw new Error(r);
+    var t = liff.getIDToken();
+    if (!t) { liff.login(); throw new Error('กำลังล็อกอิน LINE…'); }
+    return t;
+  });
+}
+function api(body){
+  return getToken().then(function(t){
+    body.idToken = t;
+    return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }).then(function(r){ return r.json(); });
+  }).then(function(res){
+    if (!res.ok && /หมดอายุ/.test(res.error || '')) { try { liff.logout(); } catch (e) {} liff.login(); }
+    return res;
+  });
+}
+function openUrl(u){ try { liff.openWindow({ url: u, external: true }); } catch (e) { window.open(u, '_blank'); } }
+
+/* ---------- ข้อมูลสายทาง/วันหยุด: ใช้ที่จำไว้ก่อน แล้วอัปเดตเงียบๆ ---------- */
+function loadCache(){
+  try {
+    var c = JSON.parse(localStorage.getItem(CK) || 'null');
+    if (c && c.highways && c.highways.length) { meta.highways = c.highways; if (c.holidays && c.holidays.length) meta.holidays = c.holidays; if (c.limit) limit = c.limit; }
+  } catch (e) { /* ไม่มีแคชก็ใช้ข้อมูลสำรอง */ }
+  buildHol();
+}
+function refreshMeta(){
+  api({ action: 'meta' }).then(function(res){
+    if (!res || !res.ok) return;
+    var m = {};
+    (res.systems || []).forEach(function(s){ m[s.key] = s.highways || []; });
+    var list = m[sysKey] || m.accident || [];
+    if (list.length) meta.highways = list.map(function(h){ var x = String(h.label || '').match(/\((.*)\)\s*$/); return { value: String(h.value), sec: x ? x[1] : '' }; });
+    if (res.holidays && res.holidays.length) meta.holidays = res.holidays;
+    if (res.limitDays) limit = res.limitDays;
+    buildHol();
+    try { localStorage.setItem(CK, JSON.stringify({ highways: meta.highways, holidays: meta.holidays, limit: limit })); } catch (e) { /* ข้าม */ }
+    if ($('hw')) { renderHw(); updDue(); }
+  }).catch(function(){ /* ใช้ข้อมูลที่มีอยู่ */ });
 }
 
-async function boot(){
-  if (!LIFF_ID || !/^https:\/\/script\.google\.com\/.+\/exec$/.test(API_URL)) {
-    return setupMsg('ยังไม่ได้ตั้งค่า <b>LIFF_ID</b> และ <b>API_URL</b> ในไฟล์ draft.html — ดูคู่มือ "ร่างอุบัติเหตุ" หัวข้อฟอร์มใน LINE');
-  }
-  try { await liff.init({ liffId: LIFF_ID }); }
-  catch (e) { return setupMsg('เปิดฟอร์มไม่สำเร็จ: ' + esc(e && e.message ? e.message : e)); }
-  if (!liff.isLoggedIn()) { liff.login(); return; }
-  var token = liff.getIDToken();
-  if (!token) { liff.login(); return; }
-  var res;
-  try { res = await api({ action: 'meta', idToken: token }); }
-  catch (e) { return setupMsg('เชื่อมต่อระบบไม่ได้ ตรวจสัญญาณอินเทอร์เน็ตแล้วเปิดใหม่'); }
-  if (!res.ok) {
-    if (/หมดอายุ/.test(res.error || '')) { try { liff.logout(); } catch (e) {} liff.login(); return; }
-    return setupMsg(esc(res.error || 'เกิดข้อผิดพลาด'));
-  }
-  meta = res; limit = res.limitDays || 10;
-  (res.holidays || []).forEach(function(d){ hol[d] = 1; });
-  var q = new URLSearchParams(location.search);
-  var k = q.get('sys') || '';
-  if (!q.get('sys') && location.hash) { var m = location.hash.match(/sys=(\w+)/); if (m) k = m[1]; }
-  var found = (meta.systems || []).some(function(s){ return s.key === k; });
-  if (found) showForm(k); else showPicker();
+/* ---------- ฟอร์มบันทึกร่าง ---------- */
+function getSys(){
+  var q = new URLSearchParams(location.search), k = q.get('sys') || '';
+  if (!k && location.hash) { var m = location.hash.match(/sys=(\w+)/); if (m) k = m[1]; }
+  return k;
 }
-
 function showPicker(){
   $('title').textContent = 'บันทึกรายการร่าง'; $('icon').textContent = '▤'; $('sub').textContent = 'เลือกงาน';
-  root.innerHTML = '<div class="card"><div class="pick">' + meta.systems.map(function(s){
-    return '<button data-k="' + s.key + '">' + (SYS[s.key] ? SYS[s.key].icon + ' ' : '') + esc(s.label) + '</button>'; }).join('') + '</div></div>';
-  root.querySelectorAll('button[data-k]').forEach(function(b){ b.onclick = function(){ showForm(b.getAttribute('data-k')); }; });
+  root.innerHTML = '<div class="card"><div class="pick">' + ['accident','theft','boundary','permit'].map(function(k){
+    return '<button data-k="' + k + '">' + SYS[k].icon + ' ' + esc(SYS[k].label) + '</button>'; }).join('') + '</div></div>';
+  root.querySelectorAll('button[data-k]').forEach(function(b){ b.onclick = function(){ showForm(b.getAttribute('data-k')); refreshMeta(); }; });
 }
-
+function renderHw(){
+  $('hw').innerHTML = meta.highways.map(function(h){
+    return '<button type="button" class="hwrow' + (h.value === selHw ? ' on' : '') + '" data-v="' + esc(h.value) + '"><b>ทล.' + esc(h.value) + '</b><span>' + esc(h.sec) + '</span></button>';
+  }).join('');
+  $('hw').querySelectorAll('.hwrow').forEach(function(b){ b.onclick = function(){ selHw = b.getAttribute('data-v'); renderHw(); }; });
+}
+function parseKm(v){
+  v = String(v || '').replace(/[๐-๙]/g, function(c){ return String(c.charCodeAt(0) - 0x0E50); }).replace(/\s+/g, '');
+  var m = v.match(/^(\d{1,4})(?:\+(\d{1,3}))?$/);
+  return m ? (+m[1]) * 1000 + (m[2] ? +m[2] : 0) : null;
+}
 function showForm(k){
-  sysKey = k; setTheme(k);
-  var s = meta.systems.filter(function(x){ return x.key === k; })[0];
-  var today = ymd(new Date());
-  $('sub').textContent = 'กรอก 3 ช่อง แล้วระบบติดตามให้';
+  sysKey = k; selHw = ''; setTheme(k);
+  var s = SYS[k], today = ymd(new Date());
   root.innerHTML =
     '<div class="card">' +
-      '<div class="f"><label>' + esc(s.startLabel) + '</label><input type="date" id="fDate" value="' + today + '" max="' + today + '"></div>' +
-      '<div class="f"><label>ทางหลวง (ทล.)</label><select id="fHw"><option value="">— เลือก —</option>' +
-        s.highways.map(function(h){ return '<option value="' + esc(h.value) + '">' + esc(h.label) + '</option>'; }).join('') + '</select></div>' +
-      '<div class="f"><label>กิโลเมตร</label><div class="km"><div style="flex:1"><input id="fKm" type="number" inputmode="numeric" min="0" placeholder="145"><div class="u">กม.</div></div><span>+</span><div style="flex:1"><input id="fM" type="number" inputmode="numeric" min="0" max="999" placeholder="200"><div class="u">เมตร</div></div></div></div>' +
+      '<div class="f"><label>' + esc(s.start) + '</label><input type="date" id="fDate" value="' + today + '" max="' + today + '"></div>' +
+      '<div class="f"><label>ทางหลวง (ทล.)</label><div class="hw" id="hw"></div></div>' +
+      '<div class="f"><label>กิโลเมตร</label><input id="fKm" type="text" inputmode="tel" autocomplete="off" placeholder="เช่น 145+200"><div class="hint" id="kmHint"></div></div>' +
       '<div class="f"><label>หมายเหตุ (ไม่บังคับ)</label><input id="fNote" type="text" maxlength="200" placeholder="เช่น รถบรรทุกชนเสาไฟ"></div>' +
       '<div class="due" id="due"></div><div class="err" id="err"></div>' +
       '<button class="main" id="go">บันทึกร่าง</button>' +
     '</div>';
+  renderHw();
   $('fDate').addEventListener('input', updDue); updDue();
+  $('fKm').addEventListener('input', function(){
+    var v = parseKm($('fKm').value), h = $('kmHint');
+    h.textContent = $('fKm').value.trim() === '' ? '' : (v === null ? 'พิมพ์เป็น กม.+เมตร เช่น 145+200' : 'กม.' + Math.floor(v / 1000) + '+' + ('00' + (v % 1000)).slice(-3));
+  });
   $('go').onclick = function(){ submit(false); };
 }
 function updDue(){
-  var d = $('fDate').value;
-  $('due').innerHTML = d ? 'ครบกำหนดส่งแขวง <b>' + thDate(addWork(d, limit)) + '</b><br><span style="font-size:13px;color:var(--mut)">' + limit + ' วันทำการ นับจากวันที่เลือก</span>' : 'เลือกวันที่เพื่อดูวันครบกำหนด';
+  var d = $('fDate') && $('fDate').value;
+  if (!$('due')) return;
+  $('due').innerHTML = d ? 'ครบกำหนดส่งแขวง <b>' + thFull(addWork(d, limit)) + '</b><br><span style="font-size:13px;color:var(--mut)">' + limit + ' วันทำการ นับจากวันที่เลือก</span>' : 'เลือกวันที่เพื่อดูวันครบกำหนด';
 }
-async function submit(force){
+function submit(force){
   if (busy) return;
-  var d = $('fDate').value, hw = $('fHw').value, kmv = $('fKm').value, mv = $('fM').value || '0';
-  var err = $('err'); err.textContent = '';
+  var d = $('fDate').value, km = parseKm($('fKm').value), err = $('err'); err.textContent = '';
   if (!d) { err.textContent = 'เลือกวันที่'; return; }
   if (d > ymd(new Date())) { err.textContent = 'วันที่เป็นอนาคตไม่ได้'; return; }
-  if (!hw) { err.textContent = 'เลือกทางหลวง'; return; }
-  if (kmv === '' || +kmv < 0) { err.textContent = 'กรอกกิโลเมตร'; return; }
-  if (+mv < 0 || +mv > 999) { err.textContent = 'เมตรต้องอยู่ระหว่าง 0-999'; return; }
-  var token = liff.getIDToken();
-  if (!token) { liff.login(); return; }
+  if (!selHw) { err.textContent = 'เลือกทางหลวง'; return; }
+  if (km === null || $('fKm').value.trim() === '') { err.textContent = 'กรอกกิโลเมตร เช่น 145+200'; return; }
   busy = true; $('go').disabled = true; $('go').textContent = 'กำลังบันทึก…';
-  var res;
-  try { res = await api({ action: 'create', idToken: token, sys: sysKey, startDate: d, highway: hw, km: (+kmv) * 1000 + (+mv), note: $('fNote').value.trim(), force: !!force }); }
-  catch (e) { res = { ok: false, error: 'เชื่อมต่อไม่ได้ ตรวจสัญญาณแล้วกดอีกครั้ง' }; }
-  busy = false; $('go').disabled = false; $('go').textContent = 'บันทึกร่าง';
-  if (res.ok) return done(res);
-  if (res.dup) { if (window.confirm(res.error + '\nต้องการบันทึกซ้ำหรือไม่')) return submit(true); return; }
-  if (/หมดอายุ/.test(res.error || '')) { try { liff.logout(); } catch (e) {} liff.login(); return; }
-  err.textContent = res.error || 'บันทึกไม่สำเร็จ';
+  api({ action: 'create', sys: sysKey, startDate: d, highway: selHw, km: km, note: $('fNote').value.trim(), force: !!force }).catch(function(e){
+    return { ok: false, error: e && e.message ? e.message : 'เชื่อมต่อไม่ได้ ตรวจสัญญาณแล้วกดอีกครั้ง' };
+  }).then(function(res){
+    busy = false; $('go').disabled = false; $('go').textContent = 'บันทึกร่าง';
+    if (res.ok) return done(res);
+    if (res.dup) { if (window.confirm(res.error + '\nต้องการบันทึกซ้ำหรือไม่')) return submit(true); return; }
+    err.textContent = res.error || 'บันทึกไม่สำเร็จ';
+  });
 }
 function done(r){
   $('sub').textContent = 'บันทึกแล้ว';
   root.innerHTML = '<div class="card ok"><div class="big">✓</div><h2>บันทึกร่างแล้ว</h2>' +
-    '<div class="sum">' + esc(r.place) + '\n' + esc(SYS[sysKey] ? ({accident:'เกิด',theft:'แจ้งความ',boundary:'ชี้แนว',permit:'รับเรื่อง'})[sysKey] : '') + ' ' + esc(r.startText) + '\nครบกำหนด ' + esc(r.dueText) + '</div>' +
+    '<div class="sum">' + esc(r.place) + '\n' + esc(SYS[sysKey].word) + ' ' + esc(r.startText) + '\nครบกำหนด ' + esc(r.dueText) + '</div>' +
     '<p>ระบบจะเตือนทาง LINE เมื่อเหลือ 3 วันทำการ และวันครบกำหนด</p>' +
     '<button class="main" id="again">บันทึกอีกเรื่อง</button><button class="ghost" id="close">ปิด</button></div>';
   $('again').onclick = function(){ showForm(sysKey); };
   $('close').onclick = function(){ try { liff.closeWindow(); } catch (e) { window.close(); } };
+}
+
+/* ---------- งานค้างทั้งหมด (รายการร่างทุกงาน) ---------- */
+function chipOf(it){
+  if (it.kind === 'today') return '<span class="chip r">ครบกำหนดวันนี้</span>';
+  if (it.kind === 'over') return '<span class="chip r">' + (it.left < 0 ? 'เลยกำหนด ' + (-it.left) + ' วัน' : 'เลยกำหนดแล้ว') + '</span>';
+  if (it.kind === 'remind') return '<span class="chip y">เหลือ ' + it.left + ' วัน</span>';
+  return '<span class="chip g">เหลือ ' + it.left + ' วัน</span>';
+}
+function showAll(){
+  sysKey = 'all'; setTheme('all');
+  root.innerHTML = '<div class="load">กำลังโหลดรายการร่าง…</div>';
+  api({ action: 'overview' }).catch(function(e){ return { ok: false, error: e && e.message ? e.message : 'เชื่อมต่อไม่ได้' }; }).then(function(res){
+    if (!res.ok) { root.innerHTML = '<div class="setup">' + esc(res.error || 'โหลดไม่สำเร็จ') + '</div><div class="acts"><button class="ghost" id="rt">ลองอีกครั้ง</button></div>'; $('rt').onclick = showAll; return; }
+    var d = res.data, total = 0, warn = 0, over = 0;
+    d.systems.forEach(function(s){ s.items.forEach(function(it){ total++; if (it.kind === 'over' || it.kind === 'today') over++; else if (it.kind === 'remind') warn++; }); });
+    $('sub').textContent = 'ข้อมูล ณ ' + thFull(d.today);
+    var h = '<div class="chips"><span class="chip n">ค้าง ' + total + ' เรื่อง</span>' + (warn ? '<span class="chip y">ใกล้ครบ ' + warn + '</span>' : '') + (over ? '<span class="chip r">ครบ/เลยกำหนด ' + over + '</span>' : '') + '</div>';
+    d.systems.forEach(function(s){
+      var c = SYS[s.key] || {};
+      h += '<div class="sec"><div class="sh" style="--sc:' + (c.color || '#888') + '">' + esc((c.icon || '') + ' ' + s.label) + '<span class="chip n">' + s.items.length + '</span><button class="open" data-u="' + esc(s.url) + '">เปิดเว็บ ›</button></div>';
+      if (!s.items.length) h += '<div class="none">ไม่มีร่างค้าง</div>';
+      s.items.forEach(function(it){
+        h += '<div class="row"><div class="l1"><b>' + esc(it.place) + '</b>' + chipOf(it) + '</div><div class="l2">' + esc(s.startWord) + ' ' + thShort(it.start) + ' · ครบ ' + thShort(it.due) + (it.linked ? ' · บันทึกเคสแล้ว' : '') + '</div>' + (it.note ? '<div class="l3">' + esc(it.note) + '</div>' : '') + '</div>';
+      });
+      h += '</div>';
+    });
+    if (d.failed && d.failed.length) h += '<div class="setup">อ่านข้อมูลไม่สำเร็จ: ' + esc(d.failed.join(', ')) + '</div>';
+    h += '<div id="rt-sec"><div class="load">กำลังโหลดงานประจำหมวด…</div></div>';
+    h += '<div class="acts"><button class="main" id="newd">＋ บันทึกร่างใหม่</button><button class="ghost" id="rf">รีเฟรช</button></div>';
+    root.innerHTML = h;
+    root.querySelectorAll('button.open').forEach(function(b){ b.onclick = function(){ openUrl(b.getAttribute('data-u')); }; });
+    $('newd').onclick = showPicker; $('rf').onclick = showAll;
+    loadRoutine();
+  });
+}
+
+/* ---------- งานประจำหมวด (ระบบบริหารหมวด: แจ้งเตือน/ติดตามงาน + วัสดุต่ำกว่าจุดสั่งซื้อ) โหลดต่อท้าย ไม่ขวางรายการร่าง ---------- */
+function loadRoutine(){
+  api({ action: 'routine' }).catch(function(e){ return { ok: false, error: e && e.message ? e.message : 'เชื่อมต่อไม่ได้' }; }).then(function(res){
+    var box = $('rt-sec'); if (!box) return;
+    if (!res.ok) { box.innerHTML = '<div class="setup">งานประจำหมวด: ' + esc(res.error || 'โหลดไม่สำเร็จ') + '</div>'; return; }
+    var d = res.data, n = d.red.length + d.yellow.length + (d.materials.count ? 1 : 0);
+    var h = '<div class="sec"><div class="sh" style="--sc:#0B2545">🗂 งานประจำหมวด<span class="chip n">' + n + '</span><button class="open" data-u="' + esc(d.url) + '">เปิดเว็บ ›</button></div>';
+    var row = function(it, cls){ return '<div class="row"><div class="l1"><b>' + esc(it.task) + '</b><span class="chip ' + cls + '">' + esc(it.pill) + '</span></div>' + (it.detail ? '<div class="l2">' + esc(it.detail) + '</div>' : '') + '</div>'; };
+    d.red.forEach(function(it){ h += row(it, 'r'); });
+    d.yellow.forEach(function(it){ h += row(it, 'y'); });
+    if (d.materials.count) {
+      var m = d.materials, lines = m.items.slice(0, 6).map(function(x){ return '• ' + esc(x.name) + ' คงเหลือ ' + Number(x.stock).toLocaleString('th-TH') + ' ' + esc(x.unit); }).join('<br>');
+      if (m.count > 6) lines += '<br>และอีก ' + (m.count - 6) + ' รายการ';
+      h += '<div class="row"><div class="l1"><b>วัสดุต่ำกว่าจุดสั่งซื้อ</b><span class="chip n">' + m.count + ' รายการ</span></div><div class="l3" style="-webkit-line-clamp:unset">' + lines + '</div></div>';
+    }
+    if (!n) h += '<div class="none">ไม่มีงานประจำที่ต้องตามตอนนี้ 👍</div>';
+    if (d.failed && d.failed.length) h += '<div class="none">อ่านไม่สำเร็จ: ' + esc(d.failed.join(', ')) + '</div>';
+    h += '</div>';
+    box.innerHTML = h;
+    box.querySelectorAll('button.open').forEach(function(b){ b.onclick = function(){ openUrl(b.getAttribute('data-u')); }; });
+  });
+}
+
+/* ---------- คำร้องทุกข์ที่ยังไม่เสร็จ ---------- */
+function showComplaints(){
+  sysKey = 'complaints'; setTheme('complaints');
+  root.innerHTML = '<div class="load">กำลังโหลดคำร้องทุกข์…</div>';
+  api({ action: 'complaints' }).catch(function(e){ return { ok: false, error: e && e.message ? e.message : 'เชื่อมต่อไม่ได้' }; }).then(function(res){
+    if (!res.ok) { root.innerHTML = '<div class="setup">' + esc(res.error || 'โหลดไม่สำเร็จ') + '</div><div class="acts"><button class="ghost" id="rt">ลองอีกครั้ง</button></div>'; $('rt').onclick = showComplaints; return; }
+    var d = res.data;
+    $('sub').textContent = 'ข้อมูล ณ ' + thFull(d.today);
+    var h = '<div class="chips"><span class="chip n">ค้าง ' + d.total + ' เรื่อง</span>' + (d.over ? '<span class="chip r">ค้างเกิน ' + d.days + ' วัน ' + d.over + '</span>' : '') + '</div>';
+    h += '<div class="sec">';
+    if (!d.items.length) h += '<div class="none">ไม่มีคำร้องทุกข์ค้าง</div>';
+    d.items.forEach(function(it){
+      var age = it.age, cls = age === null ? 'n' : age >= d.days ? 'r' : age >= Math.ceil(d.days / 2) ? 'y' : 'g';
+      var where = [it.route ? 'ทล.' + it.route : '', it.km ? 'กม.' + it.km : ''].filter(Boolean).join(' ');
+      h += '<div class="row"><div class="l1"><b>' + esc(it.no ? 'เลขรับ ' + it.no : 'คำร้อง') + '</b><span class="chip ' + cls + '">' + (age === null ? 'ไม่ระบุวันที่' : 'ค้าง ' + age + ' วัน') + '</span></div>' +
+        '<div class="l2">' + (it.date ? 'รับ ' + thShort(it.date) : '') + (where ? ' · ' + esc(where) : '') + (it.status ? ' · ' + esc(it.status) : '') + '</div>' +
+        (it.subject ? '<div class="l3">' + esc(it.subject) + '</div>' : '') + '</div>';
+    });
+    h += '</div>';
+    if (d.total > d.items.length) h += '<div class="none" style="text-align:center">แสดง ' + d.items.length + ' เรื่องแรกจาก ' + d.total + '</div>';
+    h += '<div class="acts"><button class="main" id="ow">เปิดระบบคำร้องทุกข์ (เว็บ)</button><button class="ghost" id="rf">รีเฟรช</button></div>';
+    root.innerHTML = h;
+    $('ow').onclick = function(){ openUrl(d.url); }; $('rf').onclick = showComplaints;
+  });
+}
+
+/* ---------- เริ่มทำงาน ---------- */
+function boot(){
+  if (!LIFF_ID || !/^https:\/\/script\.google\.com\/.+\/exec$/.test(API_URL)) {
+    return setupMsg('ยังไม่ได้ตั้งค่า <b>LIFF_ID</b> และ <b>API_URL</b> ในไฟล์ draft.html — ดูคู่มือ "รายการร่าง" หัวข้อฟอร์มใน LINE');
+  }
+  loadCache();
+  startLiff();
+  var k = getSys();
+  if (k === 'all') showAll();
+  else if (k === 'complaints') showComplaints();
+  else if (SYS[k]) { showForm(k); refreshMeta(); }
+  else showPicker();
 }
 boot();
 </script>
