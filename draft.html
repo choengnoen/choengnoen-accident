@@ -22,13 +22,9 @@ label{display:block;font-size:14px;font-weight:500;color:var(--mut);margin:0 0 6
 input{width:100%;min-width:0;max-width:100%;height:50px;font:inherit;font-size:17px;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:0 14px;background:#fff;appearance:none;-webkit-appearance:none}
 input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px var(--ac2)}
 .hint{font-size:13px;color:var(--mut);margin-top:6px;min-height:18px}
-.hw{display:flex;flex-direction:column;gap:6px}
-.hwrow{display:flex;align-items:center;gap:8px;width:100%;height:46px;padding:0 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:16px;color:var(--ink);text-align:left;white-space:nowrap;overflow:hidden}
-.hwrow b{font-weight:600;flex:none}
-.hwrow span{color:var(--mut);overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
-.hwrow.on{border-color:var(--ac);background:var(--ac2)}
-.hwrow.on span{color:var(--ink)}
-.hwrow.on::after{content:'✓';color:var(--ac);font-weight:600;flex:none}
+select{width:100%;min-width:0;max-width:100%;height:50px;font:inherit;font-size:15px;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:0 40px 0 14px;background:#fff;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%235B6B82' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
+select:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px var(--ac2)}
+option{font-size:15px;white-space:nowrap}
 .due{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--ac2);color:var(--ink);font-size:15px;line-height:1.5}
 .due b{font-weight:600}
 .err{margin-top:12px;color:#B3261E;font-size:14px;min-height:20px}
@@ -179,6 +175,8 @@ function refreshMeta(){
 /* ---------- ฟอร์มบันทึกร่าง ---------- */
 function getSys(){
   var q = new URLSearchParams(location.search), k = q.get('sys') || '';
+  // เปิดผ่านลิงก์ liff.line.me/...?sys=xxx: LINE โหลดหน้านี้ก่อนโดยเก็บค่าไว้ใน liff.state (เช่น ?sys=theft) แล้วค่อยแปลงเป็น ?sys= หลัง liff.init
+  if (!k) { var st = q.get('liff.state') || ''; var ms = st.match(/sys=(\w+)/); if (ms) k = ms[1]; }
   if (!k && location.hash) { var m = location.hash.match(/sys=(\w+)/); if (m) k = m[1]; }
   return k;
 }
@@ -189,10 +187,12 @@ function showPicker(){
   root.querySelectorAll('button[data-k]').forEach(function(b){ b.onclick = function(){ showForm(b.getAttribute('data-k')); refreshMeta(); }; });
 }
 function renderHw(){
-  $('hw').innerHTML = meta.highways.map(function(h){
-    return '<button type="button" class="hwrow' + (h.value === selHw ? ' on' : '') + '" data-v="' + esc(h.value) + '"><b>ทล.' + esc(h.value) + '</b><span>' + esc(h.sec) + '</span></button>';
+  var sel = $('hw');
+  sel.innerHTML = '<option value="">— เลือกทางหลวง —</option>' + meta.highways.map(function(h){
+    return '<option value="' + esc(h.value) + '"' + (h.value === selHw ? ' selected' : '') + '>ทล.' + esc(h.value) + (h.sec ? '  ' + esc(h.sec) : '') + '</option>';
   }).join('');
-  $('hw').querySelectorAll('.hwrow').forEach(function(b){ b.onclick = function(){ selHw = b.getAttribute('data-v'); renderHw(); }; });
+  sel.value = selHw;
+  sel.onchange = function(){ selHw = sel.value; };
 }
 function parseKm(v){
   v = String(v || '').replace(/[๐-๙]/g, function(c){ return String(c.charCodeAt(0) - 0x0E50); }).replace(/\s+/g, '');
@@ -205,7 +205,7 @@ function showForm(k){
   root.innerHTML =
     '<div class="card">' +
       '<div class="f"><label>' + esc(s.start) + '</label><input type="date" id="fDate" value="' + today + '" max="' + today + '"></div>' +
-      '<div class="f"><label>ทางหลวง (ทล.)</label><div class="hw" id="hw"></div></div>' +
+      '<div class="f"><label>ทางหลวง (ทล.)</label><select id="hw"></select></div>' +
       '<div class="f"><label>กิโลเมตร</label><input id="fKm" type="text" inputmode="tel" autocomplete="off" placeholder="เช่น 145+200"><div class="hint" id="kmHint"></div></div>' +
       '<div class="f"><label>หมายเหตุ (ไม่บังคับ)</label><input id="fNote" type="text" maxlength="200" placeholder="เช่น รถบรรทุกชนเสาไฟ"></div>' +
       '<div class="due" id="due"></div><div class="err" id="err"></div>' +
@@ -342,11 +342,17 @@ function boot(){
   }
   loadCache();
   startLiff();
+  var route = function(k){
+    if (k === 'all') showAll();
+    else if (k === 'complaints') showComplaints();
+    else if (SYS[k]) { showForm(k); refreshMeta(); }
+    else showPicker();
+  };
   var k = getSys();
-  if (k === 'all') showAll();
-  else if (k === 'complaints') showComplaints();
-  else if (SYS[k]) { showForm(k); refreshMeta(); }
-  else showPicker();
+  if (k) return route(k);
+  // ยังไม่รู้ว่าเปิดมาจากปุ่มไหน (เช่น LINE ยังไม่ส่งค่ามา): รอ LINE พร้อมแล้วอ่านอีกครั้ง ไม่โชว์หน้าเลือกงานค้างไว้
+  root.innerHTML = '<div class="load">กำลังเปิด…</div>';
+  ready.then(function(){ route(getSys()); });
 }
 boot();
 </script>
