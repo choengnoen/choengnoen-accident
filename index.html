@@ -1366,13 +1366,8 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           </select>
         </div>
         <div class="field">
-          <label style="text-align:center">ประกันภัย</label>
-          <select id="filterInsurance">
-            <option value="">ทั้งหมด</option>
-            <option value="yes">มี</option>
-            <option value="no">ไม่มี</option>
-            <option value="unknown">ยังไม่ระบุ</option>
-          </select>
+          <label style="text-align:center">บริษัทประกัน</label>
+          <select id="filterInsurance"><option value="">ทั้งหมด</option></select>
         </div>
         <div class="field">
           <label style="text-align:center">การจัดซ่อม</label>
@@ -2826,6 +2821,28 @@ function populateYearFilter(){
   });
   if (years.some(y => String(y) === prevValue)) fy.value = prevValue;
 }
+// ตัวกรอง "บริษัทประกัน": ทั้งหมด / มีประกัน (ทุกบริษัท) / ไม่มีประกัน / ยังไม่ระบุ / แล้วตามด้วยรายชื่อบริษัท (ชื่อมาตรฐาน) เรียงตามจำนวนเคสมากไปน้อย
+// ค่าของบริษัทเก็บเป็น "co:ชื่อ" ส่วน yes/no/unknown เหมือนเดิม (การ์ดภาพรวมที่ตั้งค่า 'yes' ยังใช้ได้)
+function populateInsurerFilter(){
+  const sel = document.getElementById('filterInsurance');
+  if (!sel) return;
+  const prev = sel.value;
+  const cnt = {};
+  let nYes = 0, nNo = 0, nUnk = 0;
+  records.forEach(r => {
+    if (r.hasInsurance === 'มี') { nYes++; const n = normalizeInsurer(r.insuranceCompany); if (n) cnt[n] = (cnt[n] || 0) + 1; }
+    else if (r.hasInsurance === 'ไม่มี') nNo++;
+    else nUnk++;
+  });
+  const names = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || naturalCompareTh(a, b));
+  const noName = records.filter(r => r.hasInsurance === 'มี' && !normalizeInsurer(r.insuranceCompany)).length;
+  const items = [['', 'ทั้งหมด'], ['yes', 'มีประกัน (' + nYes + ')'], ['no', 'ไม่มีประกัน (' + nNo + ')'], ['unknown', 'ยังไม่ระบุ (' + nUnk + ')']];
+  names.forEach(n => items.push(['co:' + n, n + ' (' + cnt[n] + ')']));
+  if (noName) items.push(['co:', 'มีประกัน แต่ยังไม่ระบุบริษัท (' + noName + ')']);
+  sel.innerHTML = '';
+  items.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); });
+  sel.value = items.some(i => i[0] === prev) ? prev : '';
+}
 
  
 
@@ -4043,6 +4060,7 @@ function statusPill(status, type){
 }
 function renderTable(){
   populateYearFilter();
+  populateInsurerFilter();
   const q = document.getElementById('searchBox').value.trim().toLowerCase();
   const fYear = document.getElementById('filterYear').value;
   const fHw = document.getElementById('filterHighway').value;
@@ -5238,6 +5256,7 @@ function recordMatchesList(r, f, seqMap){
   if (f.ins === 'yes' && r.hasInsurance !== 'มี') return false;
   if (f.ins === 'no' && r.hasInsurance !== 'ไม่มี') return false;
   if (f.ins === 'unknown' && r.hasInsurance) return false;
+  if (f.ins.startsWith('co:') && (r.hasInsurance !== 'มี' || normalizeInsurer(r.insuranceCompany) !== f.ins.slice(3))) return false;
   if (f.repair === 'pending' && r.repairStatus === 'จัดซ่อมแล้ว') return false;
   if (f.repair === 'done' && r.repairStatus !== 'จัดซ่อมแล้ว') return false;
   if (f.repair === 'unknown' && r.repairStatus) return false;
@@ -5266,7 +5285,7 @@ function describeListFilters(){
   if (f.year) out.push('ปีงบประมาณ ' + f.year);
   if (f.hw) out.push('ทล.' + f.hw);
   if (f.status) out.push(f.status === 'open' ? 'ยังไม่ยุติเรื่อง' : 'ยุติเรื่องแล้ว');
-  if (f.ins) out.push('ประกันภัย: ' + ({ yes: 'มี', no: 'ไม่มี', unknown: 'ยังไม่ระบุ' })[f.ins]);
+  if (f.ins) out.push('ประกันภัย: ' + (f.ins.startsWith('co:') ? (f.ins.slice(3) || 'มีประกัน แต่ยังไม่ระบุบริษัท') : ({ yes: 'มี', no: 'ไม่มี', unknown: 'ยังไม่ระบุ' })[f.ins]));
   if (f.repair) out.push('การจัดซ่อม: ' + ({ pending: 'ยังไม่จัดซ่อม', done: 'จัดซ่อมแล้ว', unknown: 'ยังไม่ระบุ' })[f.repair]);
   if (f.q) out.push('คำค้น "' + document.getElementById('searchBox').value.trim() + '"');
   return out;
