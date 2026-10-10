@@ -772,7 +772,17 @@ tr.asset-frequent:hover td{background:#fbe9c9 !important}
 #dataTable td.case-cell b{font-weight:600}
 .c-sub{display:block;font-size:11.5px;color:var(--ink-mute);line-height:1.3;margin-top:1px}
 /* หน้าบันทึกรายการใหม่: ใช้ฟอนต์ Sarabun ทั้งหน้า ยกเว้นหัวเรื่อง 1-4 (.section-title) และแถบปุ่ม ล้างฟอร์ม/บันทึกข้อมูล (.form-savebar) ที่คงเดิม */
-#view-form :not(.section-title):not(.section-title *):not(.form-savebar):not(.form-savebar *){font-family:'Sarabun',sans-serif}
+#view-form :not(.section-title):not(.section-title *):not(.form-savebar):not(.form-savebar *),
+#formModal :not(.section-title):not(.section-title *):not(.form-savebar):not(.form-savebar *):not(.fm-title){font-family:'Sarabun',sans-serif}
+/* ฟอร์มบันทึกเคสแบบหน้าต่างลอย (z-index ต่ำกว่า toast=50 ไม่ได้ จึงใช้ 40 เพื่อให้ข้อความแจ้งเตือนยังเห็นอยู่ด้านบน) */
+.fm-wrap{position:fixed;inset:0;z-index:40;background:rgba(7,27,48,.58);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow-y:auto;padding:24px 16px}
+.fm-box{max-width:1100px;margin:0 auto;background:var(--paper);border-radius:18px;padding:0 18px 18px;box-shadow:0 26px 64px -18px rgba(7,27,48,.5);animation:modalPop .18s cubic-bezier(.22,.9,.32,1.2)}
+.fm-head{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:10px;padding:14px 2px 12px;margin-bottom:12px;background:var(--paper);border-bottom:1px solid var(--line);border-radius:18px 18px 0 0}
+.fm-title{font-family:'Kanit',sans-serif;font-weight:700;font-size:18px;color:var(--navy-900)}
+.fm-close{margin-left:auto;width:34px;height:34px;border-radius:50%;border:0;background:var(--paper-2);color:var(--ink-soft);font-size:16px;cursor:pointer}
+.fm-close:hover{background:#dfe2dd}
+@media(max-width:640px){.fm-wrap{padding:0}.fm-box{border-radius:0;min-height:100%;padding:0 10px 12px}.fm-head{border-radius:0}}
+#kmHint{font-weight:400;margin:0 0 0 4px;font-size:11.5px}
 /* หน้าต่างรายละเอียดเคส: เนื้อหาภายใน (หัวข้อการ์ด ยอดรวมสุทธิ ฯลฯ) ใช้ Sarabun ทั้งหมด — หัวสีกรมท่าและปุ่มด้านล่างคงเดิม */
 .case-modal .modal-body,.case-modal .modal-body *{font-family:'Sarabun',sans-serif}
 /* ช่องเลือกแบบเดียวกันทั้งระบบ (แทน select ของเบราว์เซอร์) */
@@ -976,6 +986,15 @@ tr.route-editable:hover td{background:var(--amber-glow)}
   
   <div class="view" id="view-form">
    <div id="draftPanel" style="margin-bottom:14px"></div>
+  </div>
+
+  <!-- ฟอร์มบันทึกเคส: ซ่อนไว้ แสดงเป็นหน้าต่างลอยเมื่อกด "บันทึกเคส" ที่รายการร่าง (หรือกดแก้ไขเคสจากหน้ารายการ) -->
+  <div class="fm-wrap" id="formModal" style="display:none">
+   <div class="fm-box">
+   <div class="fm-head">
+     <span class="fm-title" id="formModalTitle">บันทึกเคสอุบัติเหตุ</span>
+     <button type="button" class="fm-close" id="formModalClose" title="ปิด">✕</button>
+   </div>
    <div class="form-layout">
     <div class="form-main">
     <div class="edit-mode-banner" id="editModeBanner">
@@ -1014,9 +1033,8 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <input type="hidden" id="f_section">
         </div>
         <div class="field">
-          <label>กม. ที่เกิดเหตุ <span class="req">*</span></label>
+          <label>กม. ที่เกิดเหตุ <span class="req">*</span> <span class="km-hint" id="kmHint"></span></label>
           <input type="text" id="f_km">
-          <span class="hint km-hint" id="kmHint"></span>
         </div>
         <div class="field">
           <label>ด้าน / ตำแหน่ง</label>
@@ -1224,7 +1242,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         <div class="field">
           <label>ส่งเอกสารถึงแขวงเมื่อ (วันที่)</label>
           <input type="date" id="f_sentToDistrictDate">
-          <div class="hint">ภายใน 10 วันนับจากวันเกิดเหตุ — กรอกวันที่ส่งแล้ว ระบบแจ้งเตือนจะเลิกติดตามเรื่องนี้</div>
         </div>
       </div>
     </div>
@@ -1238,10 +1255,11 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 
     <div class="form-savebar">
       <span class="hint" id="editingHint" style="margin-right:auto"></span>
-      <button class="btn btn-outline" id="btnClearForm" type="button">ล้างฟอร์ม</button>
+      <button class="btn btn-outline" id="btnClearForm" type="button">ยกเลิก</button>
       <button class="btn btn-primary" id="btnSave" type="button">บันทึกข้อมูล</button>
     </div>
     </div>
+   </div>
    </div>
   </div>
 
@@ -1406,19 +1424,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         <div class="section-title">🏷 จัดระเบียบข้อมูล</div>
         <p class="hint">รวมชื่อบริษัทประกันที่พิมพ์ไม่เหมือนกัน และแก้รูปแบบเลขที่หนังสืออ้างอิงให้ตรงกัน (ดูตัวอย่างก่อนปรับ)</p>
         <button class="btn btn-outline" id="btnInsurerCleanup" type="button">ตรวจและจัดระเบียบ</button>
-      </div>
-      <div class="card" id="cardZoneFill" style="display:none">
-        <div class="section-title">📍 เติมเขตพื้นที่ให้เคสเก่า</div>
-        <p class="hint">เติม สภ./ตำบล/อำเภอ/หมู่ ให้เคสเก่าที่ยังว่าง จากฐานข้อมูลกลาง (ดูรายการก่อนยืนยัน ไม่แตะเคสที่มีข้อมูลเขตอยู่แล้ว)</p>
-        <button class="btn btn-outline" id="btnZoneFill" type="button">เติมเขตพื้นที่ให้เคสที่ยังว่าง</button>
-      </div>
-      <div class="card" id="cardImport" style="display:none">
-        <div class="section-title">⬆ นำเข้าจากระบบเดิม</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <input type="file" id="importFile" accept=".xlsx" style="max-width:100%">
-          <button class="btn btn-primary" id="btnImport" type="button">เริ่มนำเข้า</button>
-        </div>
-        <div id="importLog"></div>
       </div>
     </div>
     <div class="card">
@@ -2237,10 +2242,7 @@ function updateWhoDisplay(){
   const trashCard = document.getElementById('cardTrash');
   if (teamCard) teamCard.style.display = recorderName ? '' : 'none';
   if (trashCard) trashCard.style.display = recorderName ? '' : 'none';
-  const importCard = document.getElementById('cardImport');
-  if (importCard) importCard.style.display = isPrivileged() ? '' : 'none';
   updateInsurerCard();
-  updateZoneFillCard();
   renderTeamPanel();
   
   
@@ -2372,7 +2374,7 @@ async function renderDirNotice(){
   if (!document.getElementById('dirNotice')) return;
   const bad = st.missing.length + st.extra.length;
   if (st.ready && !bad) {
-    box.innerHTML = '<p class="hint" style="margin-top:14px">🔒 สมุดชื่อล็อกอิน: ย้ายแล้ว — คนที่ยังไม่ล็อกอินมองไม่เห็นว่าใครเป็นเจ้าของ/ผู้ดูแลระบบ</p>';
+    box.innerHTML = '';
     return;
   }
   const why = !st.ready
@@ -3258,7 +3260,7 @@ function updateZoneFields(fromRemote){
       if (!cur || (zoneLastAuto && cur === zoneLastAuto[k]) || (k === 'changwat' && !zoneLastAuto && cur === 'ระยอง')) el.value = auto[k] || '';
     });
     zoneLastAuto = auto;
-    hint.textContent = 'เติมเขตพื้นที่จากฐานข้อมูลกลางให้แล้ว — แก้ไขเองได้';
+    hint.textContent = '';
     hint.classList.remove('warn');
     refreshMooOptions(zone, curMoo);
   } else {
@@ -3281,86 +3283,6 @@ function updateZoneFields(fromRemote){
 }
 function zoneAreaText(r){
   return [r.tambon ? 'ต.' + r.tambon : '', r.amphoe ? 'อ.' + r.amphoe : '', r.changwat ? 'จ.' + r.changwat : ''].filter(Boolean).join(' ');
-}
-// เคสเก่าที่ยังไม่มีเขตพื้นที่เลย (สภ./ตำบล/อำเภอ ว่างทั้งหมด) → หาเขตจาก ทล./กม./ด้าน ของเคส (ไม่แตะเคสที่มีข้อมูลบางช่องอยู่แล้ว)
-function buildZoneFillPlan(){
-  const changes = [], notFound = [];
-  records.forEach(r => {
-    if (String(r.policeStation || '').trim() || String(r.tambon || '').trim() || String(r.amphoe || '').trim()) return;
-    const km = (typeof r.km === 'number') ? r.km : parseKm(String(r.km == null ? '' : r.km));
-    const z = findZone(r.highway, km, r.side);
-    if (!z) { notFound.push(r); return; }
-    const patch = { policeStation: z.station, tambon: z.tambon, amphoe: z.amphoe, changwat: z.changwat || r.changwat || 'ระยอง' };
-    if (!r.moo && z.moobans.length === 1) patch.moo = z.moobans[0];
-    changes.push({ rec: r, zone: z, patch });
-  });
-  return { changes, notFound };
-}
-function updateZoneFillCard(){
-  const card = document.getElementById('cardZoneFill');
-  if (!card) return;
-  card.style.display = isPrivileged() ? '' : 'none';
-}
-function openZoneFillModal(){
-  if (!isPrivileged()) { showToast('เฉพาะเจ้าของระบบหรือผู้ดูแลระบบเท่านั้น'); return; }
-  const root = document.getElementById('modalRoot');
-  if (!ZONES.length) {
-    root.innerHTML = `
-      <div class="modal-backdrop"><div class="modal edit-modal">
-        <div class="modal-head em-head"><div><div class="em-lbl">ตั้งค่า</div><h3>เติมเขตพื้นที่ให้เคสที่ยังว่าง</h3></div><button class="modal-close" id="zfClose" type="button">×</button></div>
-        <div class="modal-body em-body"><p class="em-hint" style="margin:0">ยังโหลดเขตพื้นที่จากฐานข้อมูลกลางไม่ได้ (หรือฐานกลางยังไม่มีข้อมูลเขต) — ลองรีเฟรชหน้าแล้วกดใหม่</p></div>
-        <div class="cd-foot"><button class="btn btn-outline" id="zfCancel" type="button">ปิด</button></div>
-      </div></div>`;
-    document.getElementById('zfClose').onclick = document.getElementById('zfCancel').onclick = () => { root.innerHTML = ''; };
-    return;
-  }
-  const { changes, notFound } = buildZoneFillPlan();
-  const seqMap = computeSeqMap();
-  const caseNo = r => (r.fiscalYear || '') + '-' + (seqMap[r.id] || '');
-  const posText = r => 'ทล.' + r.highway + ' กม.' + formatKm(r.km) + (r.side ? ' ' + r.side : '');
-  const rowsHtml = changes.map(c => `
-    <tr><td class="nowrap-cell">${escapeHtml(caseNo(c.rec))}</td><td>${escapeHtml(posText(c.rec))}</td>
-    <td>${escapeHtml(c.patch.policeStation || '-')}</td><td>${escapeHtml(zoneAreaText(c.patch) || '-')}${c.patch.moo ? ' · ' + escapeHtml(c.patch.moo) : ''}</td></tr>`).join('');
-  const nfHtml = notFound.length ? `
-    <div class="em-sec">ไม่พบเขตพื้นที่ ${notFound.length} เคส (ข้ามไป — กรอกเองที่เคส)</div>
-    <p class="em-hint" style="margin:0">${notFound.slice(0, 40).map(r => escapeHtml(caseNo(r) + ' (' + posText(r) + ')')).join(' · ')}${notFound.length > 40 ? ' …' : ''}</p>` : '';
-  root.innerHTML = `
-    <div class="modal-backdrop"><div class="modal edit-modal">
-      <div class="modal-head em-head"><div><div class="em-lbl">ตั้งค่า</div><h3>เติมเขตพื้นที่ให้เคสที่ยังว่าง</h3></div><button class="modal-close" id="zfClose" type="button">×</button></div>
-      <div class="modal-body em-body">
-        ${changes.length ? `
-          <p class="em-hint" style="margin:0 0 12px">พบ <b>${changes.length} เคส</b> ที่ยังไม่มี สภ./ตำบล/อำเภอ และหาเขตจากฐานข้อมูลกลางได้ — จะเติมตามตารางนี้ (ดูตัวอย่างก่อน ยังไม่มีอะไรถูกแก้จนกว่าจะกดปุ่มยืนยัน · เคสที่มีข้อมูลเขตอยู่แล้วไม่ถูกแตะ)</p>
-          <div style="overflow:auto;max-height:46vh"><table class="data"><thead><tr><th>เคส</th><th>ตำแหน่ง</th><th>สภ.</th><th>พื้นที่ที่จะเติม</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>`
-        : `<p class="em-hint" style="margin:0">ไม่มีเคสที่ต้องเติมเขตพื้นที่</p>`}
-        ${nfHtml}
-      </div>
-      <div class="cd-foot">
-        <span style="flex:1" id="zfStatus" class="em-hint"></span>
-        <button class="btn btn-outline" id="zfCancel" type="button">ปิด</button>
-        ${changes.length ? `<button class="btn btn-primary" id="zfApply" type="button">เติม ${changes.length} เคส</button>` : ''}
-      </div>
-    </div></div>`;
-  const close = () => { root.innerHTML = ''; };
-  document.getElementById('zfClose').onclick = close;
-  document.getElementById('zfCancel').onclick = close;
-  const btn = document.getElementById('zfApply');
-  if (btn) btn.onclick = async () => {
-    btn.disabled = true;
-    const status = document.getElementById('zfStatus');
-    let ok = 0, fail = 0;
-    for (let i = 0; i < changes.length; i++) {
-      const c = changes[i];
-      status.textContent = 'กำลังเติม ' + (i + 1) + ' / ' + changes.length + ' …';
-      const next = Object.assign({}, c.rec, c.patch, { updatedAt: new Date().toISOString() });
-      if (await apiUpdateRecord(next)) { Object.assign(c.rec, c.patch); ok++; } else { fail++; }
-    }
-    refreshVisibleViews();
-    status.textContent = 'เติมแล้ว ' + ok + ' เคส' + (fail ? ' · ไม่สำเร็จ ' + fail + ' เคส' : '');
-    btn.textContent = fail ? 'ลองใหม่' : '✓ เสร็จแล้ว';
-    btn.disabled = !fail;
-    if (fail) btn.onclick = () => { close(); openZoneFillModal(); };
-    showToast('เติมเขตพื้นที่แล้ว ' + ok + ' เคส');
-  };
 }
 
 /* ============ form: save / edit / clear ============ */
@@ -3386,8 +3308,8 @@ function renderPhotoSlots(){
   if (!grid) return;
   const on = !!(window.FBL && FBL.photosEnabled);
   document.getElementById('photoHint').textContent = on
-    ? 'ถ่ายหรือเลือกรูปจากเครื่องได้ ระบบย่อรูปให้อัตโนมัติ (ด้านยาวไม่เกิน 1920 px) แล้วเก็บใน Google Drive ของหมวด · รูปจะถูกอัปโหลดตอนกด "บันทึกข้อมูล"'
-    : 'ยังไม่ได้ตั้งค่าที่เก็บรูป (Google Drive) — ผู้ดูแลระบบดูวิธีตั้งค่าในคู่มือติดตั้ง ส่วนอื่นของระบบใช้งานได้ตามปกติ';
+    ? ''
+    :'ยังไม่ได้ตั้งค่าที่เก็บรูป (Google Drive) — ผู้ดูแลระบบดูวิธีตั้งค่าในคู่มือติดตั้ง ส่วนอื่นของระบบใช้งานได้ตามปกติ';
   grid.innerHTML = [0, 1].map(i => {
     const s = formPhotos[i];
     let body;
@@ -3507,7 +3429,23 @@ function openPhotoLightbox(url, title){
   document.body.appendChild(d);
 }
 
+/* ฟอร์มบันทึกเคสแบบหน้าต่างลอย — clearForm() ปิดหน้าต่างให้เสมอ (บันทึกเสร็จ/ยกเลิก) · ส่วนเปิดทำที่ prefillFormFromDraft() และ loadRecordIntoForm() */
+function openFormModal(){
+  const m = document.getElementById('formModal');
+  if (!m) return;
+  document.getElementById('formModalTitle').textContent = editingId ? 'แก้ไขเคสอุบัติเหตุ' : 'บันทึกเคสอุบัติเหตุ';
+  m.style.display = 'block';
+  m.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+function closeFormModal(){
+  const m = document.getElementById('formModal');
+  if (m) m.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 function clearForm(){
+  closeFormModal();
   editingId = null;
   if (window.DRAFTS) DRAFTS.clearPending();
   resetFormPhotos([]);
@@ -3515,7 +3453,7 @@ function clearForm(){
   document.getElementById('editingHint').textContent = '';
   document.getElementById('editModeBanner').style.display = 'none';
   document.querySelector('.tab-btn[data-view="form"]').textContent = '＋ บันทึกรายการใหม่';
-  document.getElementById('btnClearForm').textContent = 'ล้างฟอร์ม';
+  document.getElementById('btnClearForm').textContent = 'ยกเลิก';
   populateFiscalYearSelect();
   document.getElementById('f_dateIncident').value = '';
   document.getElementById('f_dateFound').value = '';
@@ -3637,8 +3575,7 @@ function loadRecordIntoForm(rec){
   updateItemsSum();
   updateKmHint();
   updateHighwayHint();
-  document.querySelector('.tab-btn[data-view="form"]').click();
-  window.scrollTo({top:0, behavior:'smooth'});
+  openFormModal();
 }
 
 
@@ -3988,33 +3925,9 @@ function prefillFormFromDraft(p){
   updateKmHint();
   updateHighwayHint();
   updateZoneFields();
-  const sec = document.getElementById('fsec1');
-  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  showToast('ดึงข้อมูลจากรายการร่างแล้ว กรอกรายละเอียดต่อและกดบันทึก');
+  openFormModal();
 }
 
-/* ============ นำเข้าข้อมูลจากไฟล์ Excel ของระบบเดิม (เจ้าของระบบ ครั้งเดียว) ============ */
-async function runImport(){
-  if (!isPrivileged()) { showToast('เฉพาะเจ้าของระบบหรือผู้ดูแลระบบเท่านั้น'); return; }
-  const file = document.getElementById('importFile').files[0];
-  if (!file) { showToast('เลือกไฟล์ Excel ก่อน'); return; }
-  const btn = document.getElementById('btnImport');
-  const log = document.getElementById('importLog');
-  log.style.display = 'block';
-  log.textContent = 'กำลังอ่านไฟล์...';
-  btn.disabled = true;
-  try {
-    const buf = await file.arrayBuffer();
-    const report = await FBL.importWorkbook(XLSX, buf, m => { log.textContent = m; });
-    log.textContent = '✓ นำเข้าสำเร็จ\n' + report.join('\n') + '\n\nรันซ้ำได้ปลอดภัย (เขียนทับรายการเดิม ไม่เกิดซ้ำ)';
-    showToast('นำเข้าข้อมูลสำเร็จ');
-  } catch (e) {
-    console.error('import failed', e);
-    log.textContent = '✗ นำเข้าไม่สำเร็จ: ' + FBL.errorText(e);
-  } finally {
-    btn.disabled = false;
-  }
-}
 
 function computeSeqMap(){
   
@@ -6290,6 +6203,10 @@ async function init(){
   attachThousandsFormatting(document.getElementById('f_machineCost'), updateItemsSum);
   document.getElementById('btnAddItem').addEventListener('click', () => addItemRow());
   document.getElementById('btnClearForm').addEventListener('click', clearForm);
+  document.getElementById('formModalClose').addEventListener('click', () => {
+    if (!confirm('ปิดหน้าต่างนี้? ข้อมูลที่กรอกไว้ยังไม่ถูกบันทึกจะหายไป')) return;
+    clearForm();
+  });
   document.getElementById('f_vehicleType').addEventListener('change', updateTrailerFieldVisibility);
   document.getElementById('f_hasInsurance').addEventListener('change', updateInsuranceFieldVisibility);
   document.getElementById('btnAddOtherParty').addEventListener('click', () => addOtherPartyBlock());
@@ -6320,10 +6237,8 @@ async function init(){
     if (b) runExport(document.getElementById('exportMenu').dataset.kind, b.dataset.scope);
   });
   document.addEventListener('click', closeExportMenu);
-  document.getElementById('btnImport').addEventListener('click', runImport);
   document.getElementById('btnOpenTrash').addEventListener('click', openTrashModal);
   document.getElementById('btnInsurerCleanup').addEventListener('click', openInsurerCleanupModal);
-  document.getElementById('btnZoneFill').addEventListener('click', openZoneFillModal);
   initInsurerCombo();
   initReferenceNoField();
   document.getElementById('f_insuranceCompany').addEventListener('change', e => { e.target.value = normalizeInsurer(e.target.value); });
