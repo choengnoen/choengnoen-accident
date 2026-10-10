@@ -896,6 +896,40 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 #dashYearFilter button,.year-dropdown-btn{font-family:'Kanit',sans-serif;font-weight:600}
 #dashYearFilter button.active,.year-dropdown-btn.active{background:linear-gradient(135deg,var(--amber-500),var(--amber));color:#fff;border-color:transparent;box-shadow:0 4px 12px -2px rgba(224,98,15,.4)}
 #dashYearFilter button.active:hover,.year-dropdown-btn.active:hover{filter:brightness(1.06);color:#fff}
+/* ===== แท็บ "เอกสาร": ผังกระบวนงาน + เอกสารที่ต้องใช้ ===== */
+.gd-flow{max-width:760px;margin:4px auto 0}
+.gd-step{display:grid;grid-template-columns:minmax(110px,210px) 1fr;gap:14px;align-items:center}
+.gd-who{text-align:right;font-weight:600;font-size:13.5px;color:var(--ink-soft)}
+.gd-who b{font-family:'Kanit',sans-serif;color:var(--amber-deep)}
+.gd-shape{justify-self:center;text-align:center;font-size:14px;line-height:1.45;background:#fff;border:1.5px solid var(--ink);padding:10px 16px;min-width:230px;max-width:100%}
+.gd-shape.box{border-radius:6px}
+.gd-shape.oval{border-radius:999px;padding:12px 26px}
+.gd-shape.dia{position:relative;border:0;background:transparent;padding:26px 44px;min-width:210px}
+.gd-shape.dia::before,.gd-shape.dia::after{content:'';position:absolute;z-index:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.gd-shape.dia::before{inset:0;background:var(--ink)}
+.gd-shape.dia::after{inset:1.5px;background:#fff}
+.gd-shape.dia span{position:relative;z-index:1}
+.gd-arrow{display:grid;grid-template-columns:minmax(110px,210px) 1fr;gap:14px;font-size:12.5px;color:var(--ink-mute);padding:3px 0}
+.gd-arrow div{grid-column:2;display:flex;justify-content:center;gap:26px;align-items:center}
+.gd-arrow i{font-style:normal;color:var(--ink);font-size:16px;line-height:1}
+.gd-sub{font-size:13px;color:var(--ink-mute);margin:0 0 8px}
+.gd-tag{display:inline-block;border-radius:6px;padding:0 7px;font-size:11.5px;font-weight:600;background:var(--paper-2);color:var(--ink-soft);margin-left:6px}
+.gd-h{font-family:'Kanit',sans-serif;font-weight:600;font-size:13.5px;color:var(--ink);margin:12px 0 4px}
+.gd-ol{margin:0;padding-left:22px;font-size:13.5px;line-height:1.6}
+.gd-ol ul{margin:2px 0 4px;padding-left:18px;color:var(--ink-soft)}
+.gd-ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.6}
+.gd-doc{display:flex;gap:8px;align-items:baseline;font-size:13.5px;padding:4px 0;border-bottom:1px dotted var(--line)}
+.gd-doc:last-child{border-bottom:0}
+.gd-doc .ic{flex:none;width:20px;text-align:right;color:var(--ink-mute)}
+.gd-doc .q{margin-left:auto;font-size:12.5px;color:var(--ink-mute);white-space:nowrap}
+.gd-doc small{color:var(--amber-deep)}
+.gd-meta{display:flex;gap:10px 22px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--ink-soft)}
+.gd-meta b{color:var(--ink)}
+@media(max-width:560px){.gd-step,.gd-arrow{grid-template-columns:1fr;gap:4px}.gd-who{text-align:left}.gd-arrow div{grid-column:1}.gd-shape{min-width:0;width:100%}}
+
+/* ชิปตัวกรองที่เลือก (สายทาง/pill) ให้เหมือนปุ่ม "ทุกปีงบประมาณ" */
+.hw-tab-filter button.active,.pill-filter button.active{font-family:'Kanit',sans-serif;font-weight:600;box-shadow:0 4px 12px -2px rgba(224,98,15,.4)}
+.hw-tab-filter button.active:hover,.pill-filter button.active:hover{filter:brightness(1.06);color:#fff}
 /* ===== รูปถ่ายประกอบเคส (ไม่เกิน 2 รูป · เก็บใน Google Drive) ===== */
 .ph-count{display:inline-block;padding:2px 10px;border-radius:999px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;background:#eee;color:#555}
 .ph-count.has{background:#E1F5EE;color:#085041}
@@ -980,6 +1014,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
     <button class="tab-btn active" data-view="dash">ภาพรวม</button>
     <button class="tab-btn" data-view="list">รายการอุบัติเหตุ</button>
     <button class="tab-btn" data-view="form">＋ รายการใหม่</button>
+    <button class="tab-btn" data-view="guide">เอกสาร</button>
     <button class="tab-btn" data-view="routes">ข้อมูลสายทาง</button>
     <button class="tab-btn" data-view="assets">ข้อมูลทรัพย์สิน</button>
     <button class="tab-btn" data-view="settings">ตั้งค่า</button>
@@ -1381,6 +1416,9 @@ tr.route-editable:hover td{background:var(--amber-glow)}
   </div>
 
   
+  <!-- ===================== GUIDE (เอกสาร) ===================== -->
+  <div class="view" id="view-guide"><div id="guideRoot"></div></div>
+
   <div class="view" id="view-routes">
     <div class="card">
       <div class="assets-toolbar" style="justify-content:flex-end">
@@ -2659,6 +2697,7 @@ function initTabs(){
       if (btn.dataset.view === 'settings') renderTeamPanel();
       if (btn.dataset.view === 'assets') renderAssetsPanel();
       if (btn.dataset.view === 'routes') renderRoutesTable();
+      if (btn.dataset.view === 'guide') renderGuide();
       if (btn.dataset.view === 'form' && window.DRAFTS) DRAFTS.render();
       recordViewInHistory(btn.dataset.view);
     });
@@ -4919,7 +4958,8 @@ function renderFollowUp(){
       ${years.map(y => `<div class="backlog-row" data-fy="${escapeHtml(String(y))}"><span>${escapeHtml(String(y))}</span><div class="mini-track"><i style="width:${Math.round(byFy[y] / maxN * 100)}%"></i></div><b class="mono" style="text-align:right">${byFy[y]}</b></div>`).join('')}`;
   }
 
-  el.innerHTML = statsHtml + recentHtml + backlogHtml;
+  // ไม่แสดงรายการเคสค้าง 5 แถว (recentHtml) — แสดงเฉพาะตัวเลขสรุปกับแท่งด้านล่าง
+  el.innerHTML = statsHtml + backlogHtml;
   const goList = (year, hw) => {
     goToFilteredList(year, 'open');
     if (hw !== undefined) { document.getElementById('filterHighway').value = hw; renderTable(); }
@@ -4934,6 +4974,85 @@ function renderFollowUp(){
   if (olderLink) olderLink.onclick = () => goList(fyMode ? dashYear : 'ทั้งหมด');
 }
 
+
+/* ข้อมูลแท็บ "เอกสาร" — ระบบงานอุบัติเหตุ (ที่มา: ผังกระบวนงานสถิติหมวดการทาง งานอุบัติเหตุบนทางหลวง) */
+const GUIDE_DATA = {
+  flowTitle: 'ผังกระบวนงานสถิติหมวดการทาง · กระบวนงานการรายงานอุบัติเหตุ',
+  flow: [
+    { who: 'ธุรการหมวดการทาง', shape: 'oval', text: 'รับทราบว่า มีอุบัติเหตุ' },
+    { who: 'ธุรการหมวดการทาง', shape: 'box', text: 'กรอกข้อมูล พร้อมรวบรวมเอกสาร' },
+    { who: 'หัวหน้าหมวดการทาง', shape: 'dia', text: 'ตรวจสอบ/\nลงนาม', loop: true },
+    { who: 'ธุรการหมวดการทาง', shape: 'box', text: 'บันทึกข้อมูลในระบบ HAIMS' },
+    { who: 'ธุรการหมวดการทาง', shape: 'box', text: 'ออกเลข/ทำสำเนา/ลงสมุดส่ง' },
+    { who: 'ธุรการหมวดการทาง', shape: 'oval', text: 'เก็บสำเนาเอกสาร' }
+  ],
+  flowNote: 'ต้องบันทึกรายงานอุบัติเหตุในระบบ HAIMS (http://haims.doh.go.th) ก่อน จึงจะพิมพ์แบบรายงาน HAIMS ได้',
+  docTitle: 'เอกสารที่ต้องใช้',
+  sections: [{
+    title: '4. งานอุบัติเหตุบนทางหลวง — 4.1 กรณีทรัพย์สินของกรมทางหลวงเสียหาย หรือไม่เสียหายแต่เป็นเหตุการณ์ที่ร้ายแรง',
+    tag: 'งานสถิติหมวดการทาง',
+    steps: [
+      { text: 'รวบรวมรายละเอียดที่เกี่ยวกับอุบัติเหตุ จำนวน 8 รายการ ดังนี้', subs: [
+        '1.1 วันที่/เวลาประมาณ',
+        '1.2 สถานที่ สาย/ตอน (ชาวบ้านเรียก)/กม. (ขาขึ้น/ขาล่อง)',
+        '1.3 รายละเอียดการเกิดเหตุ/รถ',
+        '1.4 สาเหตุ/ลักษณะทางกายภาพถนน',
+        '1.5 จำนวนผู้เสียชีวิต/บาดเจ็บ',
+        '1.6 ทรัพย์สินราชการที่เสียหาย',
+        '1.7 การบริหารจราจร พร้อมภาพถ่าย',
+        '1.8 สำเนาประจำวันเกี่ยวกับคดีและสำเนาใบเปรียบเทียบปรับ',
+        'หัวหน้าหมวดการทางต้องรายงานรายละเอียดข้อ 1.1 – 1.7 ทางระบบ Line ของหน่วยงาน (ทันที) เพื่อให้ ผอ.ขท./ผอ.บท. รายงานให้ผู้บริหารทราบ'
+      ] },
+      { text: 'จัดทำบันทึกข้อความ รายงานตามแบบรายงานอุบัติเหตุทางโทรสาร และแบบรายงาน HAIMS พร้อมเอกสารที่เกี่ยวข้อง ให้หัวหน้าหมวดการทางลงนาม เพื่อเสนอผู้บังคับบัญชาต่อไป' },
+      { text: 'ทำการบันทึกข้อมูลในสมุดทะเบียนอุบัติเหตุด้วย' }
+    ],
+    forms: ['บันทึกข้อความ', 'แบบรายงานอุบัติเหตุทางโทรสาร', 'แบบรายงาน HAIMS — ต้องบันทึกรายงานอุบัติเหตุในระบบ HAIMS ที่ http://haims.doh.go.th จึงจะสามารถพิมพ์แบบรายงาน HAIMS ได้'],
+    docs: [
+      { label: 'บันทึกข้อความ', qty: '1 ฉบับ' },
+      { label: 'แบบรายงานอุบัติเหตุทางโทรสาร', qty: '1 ชุด' },
+      { label: 'แบบรายงาน HAIMS', qty: '3 ชุด' },
+      { label: 'สำเนาประจำวันเกี่ยวกับคดี', qty: '1 ชุด' },
+      { label: 'สำเนาใบเปรียบเทียบปรับ', cond: 'ถ้ามี', qty: '1 ชุด' },
+      { label: 'ภาพถ่ายที่เกิดเหตุ (ภาพรถที่เกิดเหตุ รวมถึงทรัพย์สินที่เสียหาย)', qty: '1 ชุด' },
+      { label: 'รายการประเมินราคาค่าเสียหาย กรณีมีทรัพย์สินของกรมทางหลวงเสียหาย', qty: '1 ชุด' }
+    ],
+    due: 'ภายใน 24 ชม. เป็นเหตุการณ์ร้ายแรง · ภายใน 3 วัน เป็นเหตุการณ์ไม่ร้ายแรง',
+    keep: 'เก็บสำเนาหลักฐานที่เกี่ยวข้อง จำนวน 1 ชุด'
+  }]
+};
+
+/* ============ เอกสาร: ผังกระบวนงาน + เอกสารที่ต้องใช้ (ข้อมูลอยู่ใน GUIDE_DATA ด้านบน) ============ */
+function renderGuide(){
+  const root = document.getElementById('guideRoot');
+  if (!root) return;
+  const G = GUIDE_DATA, esc = escapeHtml;
+  const flowHtml = G.flow.map((s, i) => {
+    const arrow = i === 0 ? '' : `<div class="gd-arrow"><div>${s.loop ? '<span><i>↓</i> ถูกต้อง</span><span><i>↑</i> ไม่ถูกต้อง (กลับไปแก้ไข)</span>' : '<i>↓</i>'}</div></div>`;
+    return `${arrow}<div class="gd-step"><div class="gd-who"><b>${i + 1}.</b> ${esc(s.who)}</div><div class="gd-shape ${s.shape}"><span>${esc(s.text).replace(/\n/g, '<br>')}</span></div></div>`;
+  }).join('');
+  const secHtml = G.sections.map(t => `
+    <div class="cd-card" style="margin-bottom:10px">
+      <div class="cd-sec" style="flex-wrap:wrap"><span>${esc(t.title)}</span>${t.tag ? `<span class="gd-tag">${esc(t.tag)}</span>` : ''}</div>
+      <div class="gd-h" style="margin-top:0">รายละเอียดการปฏิบัติงาน</div>
+      <ol class="gd-ol">${t.steps.map(s => `<li>${esc(s.text)}${s.subs ? `<ul>${s.subs.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</li>`).join('')}</ol>
+      ${t.forms && t.forms.length ? `<div class="gd-h">แบบฟอร์ม/เอกสารที่เกี่ยวข้อง</div><ul class="gd-ul">${t.forms.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+      <div class="gd-h">เอกสารหลักฐานที่ต้องจัดส่ง</div>
+      ${t.docs.map((d, i) => `<div class="gd-doc"><span class="ic">${i + 1}.</span><span>${esc(d.label)}${d.cond ? ` <small>(${esc(d.cond)})</small>` : ''}</span><span class="q">${esc(d.qty || '')}</span></div>`).join('')}
+      ${t.extra ? `<div class="gd-h">${esc(t.extra.title)}</div>${t.extra.docs.map((d, i) => `<div class="gd-doc"><span class="ic">${i + 1}.</span><span>${esc(d.label)}</span><span class="q">${esc(d.qty || '')}</span></div>`).join('')}` : ''}
+      <div class="gd-meta"><span>กำหนดส่งรายงาน: <b>${esc(t.due)}</b></span><span>การจัดเก็บสำเนา: <b>${esc(t.keep)}</b></span></div>
+    </div>`).join('');
+  root.innerHTML = `
+    <div class="card">
+      <div class="section-title">${esc(G.flowTitle)}</div>
+      <div class="gd-flow">${flowHtml}</div>
+      ${G.flowNote ? `<p class="hint" style="margin:12px 0 0">${esc(G.flowNote)}</p>` : ''}
+    </div>
+    <div class="card">
+      <div class="section-title">${esc(G.docTitle)}</div>
+      ${secHtml}
+      ${G.docNote ? `<p class="hint" style="margin:6px 0 0">${esc(G.docNote)}</p>` : ''}
+    </div>`;
+}
 
 function goToFilteredList(fiscalYear, status){
   document.querySelector('.tab-btn[data-view="list"]').click();
