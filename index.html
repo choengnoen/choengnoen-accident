@@ -889,6 +889,9 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 #dashYearFilter button.active,.year-dropdown-btn.active{background:linear-gradient(135deg,var(--amber-500),var(--amber));color:#fff;border-color:transparent;box-shadow:0 4px 12px -2px rgba(224,98,15,.4)}
 #dashYearFilter button.active:hover,.year-dropdown-btn.active:hover{filter:brightness(1.06);color:#fff}
 /* ===== รูปถ่ายประกอบเคส (ไม่เกิน 2 รูป · เก็บใน Google Drive) ===== */
+.ph-count{display:inline-block;padding:2px 10px;border-radius:999px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;background:#eee;color:#555}
+.ph-count.has{background:#E1F5EE;color:#085041}
+.ph-arrow{margin-left:auto;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:400;color:var(--ink-soft)}
 .ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.ph-grid{grid-template-columns:1fr}}
 .ph-slot{border:1px solid var(--line,#dfe2dd);border-radius:12px;padding:10px;background:var(--card,#fff)}
@@ -1247,10 +1250,15 @@ tr.route-editable:hover td{background:var(--amber-glow)}
     </div>
 
     <div class="card" id="fsecPhoto">
-      <div class="section-title"><span class="num">5</span> รูปถ่ายประกอบ <span class="sub">ไม่เกิน 2 รูป · ไม่บังคับ</span></div>
-      <div class="ph-grid" id="photoGrid"></div>
-      <input type="file" accept="image/*" id="photoFile" style="display:none">
-      <div class="hint" id="photoHint" style="margin-top:10px"></div>
+      <div class="section-title ph-toggle" id="photoToggle" role="button" tabindex="0" aria-expanded="false" style="margin-bottom:0;cursor:pointer">
+        <span class="num">5</span> รูปถ่ายประกอบ <span class="ph-count" id="photoCount">ยังไม่มีรูป</span>
+        <span class="ph-arrow" id="photoArrow">▾ กางออก</span>
+      </div>
+      <div id="photoBody" style="display:none;margin-top:12px">
+        <div class="ph-grid" id="photoGrid"></div>
+        <input type="file" accept="image/*" id="photoFile" style="display:none">
+        <div class="hint" id="photoHint" style="margin-top:10px"></div>
+      </div>
     </div>
 
     <div class="form-savebar">
@@ -3303,9 +3311,18 @@ function resetFormPhotos(saved){
   renderPhotoSlots();
 }
 
+function setPhotoOpen(open){
+  const b = document.getElementById('photoBody'); if (!b) return;
+  b.style.display = open ? 'block' : 'none';
+  document.getElementById('photoToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+  document.getElementById('photoArrow').textContent = open ? '▴ ซ่อน' : '▾ กางออก';
+}
 function renderPhotoSlots(){
   const grid = document.getElementById('photoGrid');
   if (!grid) return;
+  const nPh = formPhotos.filter(Boolean).length, cnt = document.getElementById('photoCount');
+  cnt.textContent = nPh ? ('มี ' + nPh + ' รูป') : 'ยังไม่มีรูป';
+  cnt.classList.toggle('has', nPh > 0);
   const on = !!(window.FBL && FBL.photosEnabled);
   document.getElementById('photoHint').textContent = on
     ? ''
@@ -3433,6 +3450,7 @@ function openPhotoLightbox(url, title){
 function openFormModal(){
   const m = document.getElementById('formModal');
   if (!m) return;
+  setPhotoOpen(false);   // แถบรูปถ่ายพับเก็บไว้ก่อน (มีกี่รูปดูได้จากป้ายในแถบ)
   document.getElementById('formModalTitle').textContent = editingId ? 'แก้ไขเคสอุบัติเหตุ' : 'บันทึกเคสอุบัติเหตุ';
   m.style.display = 'block';
   m.scrollTop = 0;
@@ -6203,6 +6221,10 @@ async function init(){
   attachThousandsFormatting(document.getElementById('f_machineCost'), updateItemsSum);
   document.getElementById('btnAddItem').addEventListener('click', () => addItemRow());
   document.getElementById('btnClearForm').addEventListener('click', clearForm);
+  const phTg = document.getElementById('photoToggle');
+  const phToggle = () => setPhotoOpen(document.getElementById('photoBody').style.display === 'none');
+  phTg.addEventListener('click', phToggle);
+  phTg.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); phToggle(); } });
   document.getElementById('formModalClose').addEventListener('click', () => {
     if (!confirm('ปิดหน้าต่างนี้? ข้อมูลที่กรอกไว้ยังไม่ถูกบันทึกจะหายไป')) return;
     clearForm();

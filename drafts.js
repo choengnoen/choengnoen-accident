@@ -134,33 +134,27 @@
     var t = today();
     var rows = [], counts = { open: 0, warn: 0, over: 0 };
     drafts.forEach(function (d) {
-      var v = viewOf(d, t); if (v.hide) return;
-      var isClosed = v.state !== 'open';
-      if (isClosed) {
-        // แสดงเฉพาะเมื่อติ๊ก "แสดงที่ปิดแล้ว" (ส่งแล้ว/จบ/ยกเลิก) — จำกัด 30 วันล่าสุดจากวันเริ่มนับ
-        if (!showClosed) return;
-        if (v.start && workLeft(t, v.start) < -60 && v.state !== 'cancelled') return;
-      } else {
-        counts.open++;
-        if (v.left < 0 || v.left === 0) counts.over++; else if (v.left <= WARN_LEFT) counts.warn++;
-      }
-      rows.push({ d: d, v: v, closed: isClosed });
+      // ตารางนี้แสดงเฉพาะร่างที่ "ยังไม่บันทึกเคส" — บันทึกเคสแล้ว (มี caseId) หรือถูกลบ ให้หายไป (เคสไปดูที่หน้ารายการอุบัติเหตุ)
+      if (d.status === 'cancelled' || d.caseId) return;
+      var v = viewOf(d, t); if (v.hide || v.state !== 'open') return;
+      counts.open++;
+      if (v.left <= 0) counts.over++; else if (v.left <= WARN_LEFT) counts.warn++;
+      rows.push({ d: d, v: v });
     });
     rows.sort(function (a, b) {
-      if (a.closed !== b.closed) return a.closed ? 1 : -1;
-      var ka = a.closed ? '' : String(a.v.due), kb = b.closed ? '' : String(b.v.due);
+      var ka = String(a.v.due), kb = String(b.v.due);
       return ka < kb ? -1 : ka > kb ? 1 : (String(a.d.startDate) < String(b.d.startDate) ? 1 : -1);
     });
 
     var failed = window.FBL && FBL.watchFailed && FBL.watchFailed.drafts;
     var editing = editingDraftId ? byId(editingDraftId) : null;
-    var html = '<div class="card" id="draftCard"><div class="section-title"><span class="num">▤</span> รายการร่าง — ติดตามจนส่งเอกสารถึงแขวง</div>';
+    var html = '<div class="card" id="draftCard"><div class="section-title"><span class="num">▤</span> รายการร่าง</div>';
     if (failed) html += '<div class="dr-warn">ยังอ่านรายการร่างไม่ได้ (' + esc(failed) + ') — ถ้าเพิ่งติดตั้งฟีเจอร์นี้ ให้วาง firestore.rules ใหม่ใน Firebase Console ก่อน</div>';
     html += '<div class="dr-head"><div class="dr-sum">' +
       '<span class="dr-chip n">ค้าง ' + counts.open + '</span>' +
       (counts.warn ? '<span class="dr-chip y">ใกล้ครบ ' + counts.warn + '</span>' : '') +
       (counts.over ? '<span class="dr-chip r">ครบ/เลยกำหนด ' + counts.over + '</span>' : '') +
-      '</div><label style="margin-left:auto;font-size:13px;cursor:pointer"><input type="checkbox" id="drShowClosed"' + (showClosed ? ' checked' : '') + '> แสดงที่ปิดแล้ว</label></div>';
+      '</div></div>';
 
     html += '<div class="dr-add">' +
       '<div class="field"><label>' + esc(CFG.startLabel) + ' <span class="req">*</span></label><input type="date" id="drDate" max="' + t + '" value="' + esc(editing ? editing.startDate : t) + '"></div>' +
@@ -173,24 +167,21 @@
     if (!rows.length) {
       html += '<div class="dr-empty">ยังไม่มีรายการร่างที่ค้างอยู่</div>';
     } else {
-      html += '<div style="overflow-x:auto"><table><thead><tr><th>' + esc(CFG.startLabel) + '</th><th>ทล. / กม.</th><th class="hm">ครบกำหนด</th><th>สถานะ</th><th>เคส</th><th></th></tr></thead><tbody>';
+      html += '<div style="overflow-x:auto"><table><thead><tr><th>' + esc(CFG.startLabel) + '</th><th>ทล. / กม.</th><th class="hm">ครบกำหนด</th><th>สถานะ</th><th></th></tr></thead><tbody>';
       rows.forEach(function (r) {
-        var d = r.d, v = r.v, cls = r.closed ? '' : (v.left <= 0 ? 'r' : (v.left <= WARN_LEFT ? 'y' : ''));
+        var d = r.d, v = r.v, cls = v.left <= 0 ? 'r' : (v.left <= WARN_LEFT ? 'y' : '');
         html += '<tr class="dr-row ' + cls + '" data-id="' + esc(d.id) + '">' +
           '<td>' + esc(tdate(v.start)) + '</td>' +
           '<td>ทล.' + esc(d.highway) + ' กม.' + esc(fmtKm(d.km)) + (d.note ? '<div class="dr-note">' + esc(d.note) + '</div>' : '') + '</td>' +
           '<td class="hm">' + (v.due ? esc(tdate(v.due)) : '-') + '</td>' +
           '<td>' + chip(v) + '</td>' +
-          '<td>' + (d.caseId ? '<span class="dr-chip g">บันทึกเคสแล้ว</span>' : '<span class="dr-chip n">ยังไม่บันทึกเคส</span>') + '</td>' +
           '<td style="white-space:nowrap">' +
-            (d.status === 'cancelled' ? '' :
-              (d.caseId ? '<button type="button" class="dr-btn pri" data-act="open">เปิดเคส</button>' : '<button type="button" class="dr-btn pri" data-act="make">บันทึกเคส</button> <button type="button" class="dr-btn" data-act="edit">แก้ไข</button>') +
-              (r.closed ? '' : ' <button type="button" class="dr-btn" data-act="cancel">ยกเลิกร่าง</button>')) +
+            '<button type="button" class="dr-btn pri" data-act="make">บันทึกเคส</button> <button type="button" class="dr-btn" data-act="edit">แก้ไข</button> <button type="button" class="dr-btn" data-act="cancel">ลบ</button>' +
           '</td></tr>';
       });
       html += '</tbody></table></div>';
     }
-    html += '<div class="dr-note" style="margin-top:8px">กำหนดส่ง = ' + esc(CFG.startLabel) + ' + ' + LIMIT_DAYS + ' วันทำการ · เมื่อกรอก "ส่งเอกสารถึงแขวง" ในเคส ร่างจะปิดเอง · แจ้งเตือน LINE: เหลือ ' + WARN_LEFT + ' วันทำการ และวันครบกำหนด</div></div>';
+    html += '</div>';
     el.innerHTML = html;
     if (keep) {
       document.getElementById('drDate').value = keep.date || t; document.getElementById('drHw').value = keep.hw;
@@ -201,12 +192,11 @@
 
   function bind(el) {
     var q = function (id) { return el.querySelector('#' + id); };
-    q('drShowClosed').onchange = function () { showClosed = this.checked; render(); };
     q('drAdd').onclick = onAdd;
     if (q('drCancelEdit')) q('drCancelEdit').onclick = function () { editingDraftId = null; render(); };
     el.querySelectorAll('tr.dr-row').forEach(function (tr) {
       var id = tr.getAttribute('data-id');
-      tr.onclick = function (ev) { if (ev.target.closest('button')) return; var d = byId(id); if (d && d.status !== 'cancelled') (d.caseId ? openCase(d) : makeCase(d)); };
+      tr.onclick = function (ev) { if (ev.target.closest('button')) return; var d = byId(id); if (d && d.status !== 'cancelled') makeCase(d); };
       tr.querySelectorAll('button[data-act]').forEach(function (b) {
         b.onclick = function () {
           var d = byId(id); if (!d) return; var a = b.getAttribute('data-act');
@@ -243,8 +233,9 @@
     if (await save(rec)) toast('เพิ่มร่างแล้ว ครบกำหนด ' + tdate(addWork(date, LIMIT_DAYS)));
   }
   async function cancelDraft(d) {
-    if (!window.confirm('ยกเลิกร่าง ทล.' + d.highway + ' กม.' + fmtKm(d.km) + ' ?\n(ร่างจะไม่ถูกติดตามและไม่แจ้งเตือนอีก)')) return;
-    if (await save({ id: d.id, status: 'cancelled', cancelledAt: new Date().toISOString(), cancelledBy: who() })) toast('ยกเลิกร่างแล้ว');
+    // ลบ = ตั้งสถานะ "cancelled" (สมาชิกทุกคนทำได้ · ไม่ต้องแก้ Rules · LINE เลิกติดตามร่างนี้)
+    if (!window.confirm('ลบร่าง ทล.' + d.highway + ' กม.' + fmtKm(d.km) + ' ?\n(ร่างจะหายจากตารางและไม่แจ้งเตือนอีก)')) return;
+    if (await save({ id: d.id, status: 'cancelled', cancelledAt: new Date().toISOString(), cancelledBy: who() })) toast('ลบร่างแล้ว');
   }
   function makeCase(d) {
     // openNew ล้างฟอร์มก่อน (ล้างค่าค้างด้วย) จึงตั้งค่าร่างที่รอผูกหลังเรียก · ถ้าหน้านั้นเลือกเปิดเรื่องเดิมแทน (ชี้แนวเขต) จะคืน { existingId }
