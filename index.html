@@ -982,6 +982,8 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .gd-ol{margin:0;padding-left:22px;font-size:13.5px;line-height:1.6}
 .gd-ol ul{margin:2px 0 4px;padding-left:18px;color:var(--ink-soft)}
 .gd-ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.6}
+.gd-ul a{color:var(--navy-700);text-decoration:underline;word-break:break-all}
+.gd-ul a:hover{color:var(--amber)}
 .gd-doc{display:flex;gap:8px;align-items:baseline;font-size:13.5px;padding:4px 0;border-bottom:1px dotted var(--line)}
 .gd-doc:last-child{border-bottom:0}
 .gd-doc .ic{flex:none;width:20px;text-align:right;color:var(--ink-mute)}
@@ -5328,6 +5330,8 @@ function renderGuide(){
   const root = document.getElementById('guideRoot');
   if (!root) return;
   const G = GUIDE_DATA, esc = escapeHtml;
+  /* ทำ URL ในข้อความ (ที่ escape แล้ว) ให้คลิกเปิดแท็บใหม่ได้ */
+  const linkify = h => h.replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
   /* ข้อย่อยแบบมีเลข (1.1 ...) เป็นชิป — ชิปที่อยู่ในกลุ่ม "ต้องรายงานทันที" ไฮไลต์สีส้ม; ข้อความที่ไม่มีเลขเป็นหมายเหตุ */
   const stepHtml = (s, i) => {
     const subs = s.subs || [];
@@ -5345,8 +5349,8 @@ function renderGuide(){
       ${t.strip ? `<div class="gd-strip" style="--n:${t.strip.length}">${t.strip.map(n => `<div class="gd-node${n.hot ? ' hot' : ''}"><span class="k">${esc(n.k)}</span><div class="ic">${n.ic}</div><h4>${esc(n.h)}</h4><p>${esc(n.p)}</p></div>`).join('')}</div>` : ''}
       ${t.steps.map(stepHtml).join('')}
       <div class="gd-two">
-        ${t.forms && t.forms.length ? `<div class="gd-panel"><h3>📄 แบบฟอร์ม/เอกสารที่เกี่ยวข้อง</h3><ul class="gd-ul">${t.forms.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
-        <div class="gd-panel"><h3>📦 เอกสารหลักฐานที่ต้องจัดส่ง</h3>
+        ${t.forms && t.forms.length ? `<div class="gd-panel"><h3>📄 แบบฟอร์ม/เอกสารที่เกี่ยวข้อง</h3><ul class="gd-ul">${t.forms.map(x => `<li>${linkify(esc(x))}</li>`).join('')}</ul></div>` : ''}
+        <div class="gd-panel"><h3>📁 เอกสารหลักฐานที่ต้องจัดส่ง</h3>
           ${t.docs.map((d, i) => `<div class="gd-row"><b>${i + 1}</b><span>${esc(d.label)}${d.cond ? ` <small>(${esc(d.cond)})</small>` : ''}</span><span class="q">${esc(d.qty || '')}</span></div>`).join('')}
           ${t.extra ? `<div class="gd-h">${esc(t.extra.title)}</div>${t.extra.docs.map((d, i) => `<div class="gd-row"><b>${i + 1}</b><span>${esc(d.label)}</span><span class="q">${esc(d.qty || '')}</span></div>`).join('')}` : ''}
         </div>
