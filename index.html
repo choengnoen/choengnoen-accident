@@ -886,8 +886,9 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 @media(max-width:760px){.cd-type{font-size:22px}.cd-v{font-size:20px}.cd-band{flex-wrap:wrap}}
 .case-modal > .modal-body{background:var(--paper);padding:18px 20px 8px 26px;margin-right:0}
 .cd-foot{display:flex;gap:10px;align-items:center;padding:14px 24px;border-top:1px solid var(--line);background:#fff;flex:none}
-.cd-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.cd-tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center}
+.cd-tiles{display:grid;grid-template-columns:1fr 1.1fr;gap:14px;margin-bottom:14px}
+.cd-tpair{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:0}
+.cd-tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center;min-width:0}
 .cd-tile .cd-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex:none}
 .cd-tile.warn .cd-ic{background:var(--spot2-bg)}.cd-tile.ok .cd-ic{background:var(--green-bg)}.cd-tile.bad .cd-ic{background:var(--rust-bg)}.cd-tile.n .cd-ic{background:var(--paper-2)}
 .cd-tile b{display:block;font-size:14px;line-height:1.3}.cd-tile span{font-size:12px;color:var(--ink-mute)}
@@ -908,7 +909,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .cd-ln{display:flex;align-items:baseline;gap:8px;font-size:14px;padding:3px 0}
 .cd-ln i{flex:1;border-bottom:2px dotted #e4cfae;transform:translateY(-3px)}
 .cd-grand{font-family:'Kanit',sans-serif;font-size:24px;color:var(--amber);font-weight:600}
-@media(max-width:760px){.cd-tiles{grid-template-columns:repeat(2,1fr)}.cd-cols{grid-template-columns:1fr}.case-modal .cd-hd h3{font-size:24px}}
+@media(max-width:760px){.cd-tiles{grid-template-columns:1fr;gap:10px}.cd-cols{grid-template-columns:1fr}.case-modal .cd-hd h3{font-size:24px}}
 /* ===== หน้าล็อกอิน (ต้องล็อกอินก่อนเห็นข้อมูล) ===== */
 .auth-gate{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;overflow:auto;
   background:radial-gradient(1100px 520px at 15% -10%, var(--navy-800) 0%, var(--ink-2) 60%)}
@@ -1074,7 +1075,8 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .snap .cd-hd h3{font-size:26px}
 .snap .snap-grid{display:grid;gap:10px}
 .snap .snap-col{display:flex;flex-direction:column;gap:10px;min-width:0}
-.snap .cd-tiles{grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0}
+.snap .cd-tiles{grid-template-columns:1fr 1.25fr;gap:10px;margin-bottom:0}
+.snap .cd-tpair{gap:8px}
 .snap .cd-tile{padding:6px 10px}
 .snap .cd-card{padding:9px 12px;margin-bottom:0}
 .snap .cd-sec{font-size:14px;margin-bottom:6px}
@@ -4882,11 +4884,16 @@ function openCaseDetailModal(id){
 
   const tile = (cls, icon, label, value) => `<div class="cd-tile ${cls}"><div class="cd-ic">${icon}</div><div><span>${label}</span><b>${value}</b></div></div>`;
   const doneCls = (v, ok) => !v ? 'n' : (v === ok ? 'ok' : 'warn');
+  // 4 กล่องแบ่งเป็น 2 ฝั่ง ให้ความกว้างตรงกับสองคอลัมน์ด้านล่าง (ซ้าย = ชดใช้/จัดซ่อม, ขวา = ยุติเรื่อง/ระยะเวลา)
   const tilesHtml = `<div class="cd-tiles">
-      ${tile(doneCls(rec.compensationStatus, 'ชดใช้แล้ว'), '💰', 'การชดใช้', escapeHtml(rec.compensationStatus || 'ไม่ระบุ'))}
-      ${tile(doneCls(rec.repairStatus, 'จัดซ่อมแล้ว'), '🔧', 'การจัดซ่อม', escapeHtml(rec.repairStatus || 'ไม่ระบุ'))}
-      ${tile(isClosed ? 'ok' : 'bad', '📁', 'การยุติเรื่อง', isClosed ? 'ยุติแล้ว ' + escapeHtml(formatThaiDate(rec.closedDate)) : 'ยังไม่ยุติ')}
-      ${tile('n', '⏱', isClosed ? 'ใช้เวลาจนยุติ' : 'ระยะเวลาค้าง', days === null ? '-' : days.toLocaleString('th-TH') + ' วัน')}
+      <div class="cd-tpair">
+        ${tile(doneCls(rec.compensationStatus, 'ชดใช้แล้ว'), '💰', 'การชดใช้', escapeHtml(rec.compensationStatus || 'ไม่ระบุ'))}
+        ${tile(doneCls(rec.repairStatus, 'จัดซ่อมแล้ว'), '🔧', 'การจัดซ่อม', escapeHtml(rec.repairStatus || 'ไม่ระบุ'))}
+      </div>
+      <div class="cd-tpair">
+        ${tile(isClosed ? 'ok' : 'bad', '📁', 'การยุติเรื่อง', isClosed ? 'ยุติแล้ว ' + escapeHtml(formatThaiDate(rec.closedDate)) : 'ยังไม่ยุติ')}
+        ${tile('n', '⏱', isClosed ? 'ใช้เวลาจนยุติ' : 'ระยะเวลาค้าง', days === null ? '-' : days.toLocaleString('th-TH') + ' วัน')}
+      </div>
     </div>`;
 
   const itemsHtml = items.length
