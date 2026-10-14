@@ -1858,7 +1858,7 @@ function renderTrendChart(allYears, totalByYear){
   if (!canvas || !window.Chart) return;
   if (trendChartInstance) { trendChartInstance.destroy(); trendChartInstance = null; }
   // กราฟแสดง 10 ปีงบล่าสุด ปีที่เก่ากว่านั้นไปอยู่ในตารางที่กดดูได้
-  const years = allYears.slice(-10);
+  const years = allYears.slice(-10).reverse(); // ปีล่าสุดอยู่บนสุด
   renderTrendOlder(allYears.slice(0, Math.max(0, allYears.length - 10)), totalByYear);
   if (!years.length) {
     canvas.style.display = 'none';
@@ -5220,7 +5220,7 @@ function renderFollowUp(){
   } else if (older.length) {
     const byFy = {};
     older.forEach(({ r }) => { const y = r.fiscalYear || '-'; byFy[y] = (byFy[y] || 0) + 1; });
-    const years = Object.keys(byFy).sort();
+    const years = Object.keys(byFy).sort().reverse(); // ปีล่าสุดอยู่บนสุด
     const maxN = Math.max(...years.map(y => byFy[y]));
     backlogHtml = `
       <div class="backlog-head"><span>เคสค้างเก่า แยกตามปีงบประมาณ</span><a class="link-btn" id="followOlderLink">ดูทั้งหมด →</a></div>
