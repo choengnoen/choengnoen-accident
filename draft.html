@@ -201,19 +201,20 @@ function parseKm(v){
 }
 function showForm(k){
   sysKey = k; selHw = ''; setTheme(k);
-  var s = SYS[k], today = ymd(new Date());
+  var s = SYS[k], today = ymd(new Date()), bd = k === 'boundary';   // ชี้แนวเขต: เลือกวันนัดล่วงหน้าได้ + กรอกพิกัดแปลงที่ดินแทน กม.
   root.innerHTML =
     '<div class="card">' +
-      '<div class="f"><label>' + esc(s.start) + '</label><input type="date" id="fDate" value="' + today + '" max="' + today + '"></div>' +
+      '<div class="f"><label>' + esc(s.start) + '</label><input type="date" id="fDate" value="' + (bd ? '' : today) + '"' + (bd ? '' : ' max="' + today + '"') + '></div>' +
       '<div class="f"><label>ทางหลวง (ทล.)</label><select id="hw"></select></div>' +
-      '<div class="f"><label>กิโลเมตร</label><input id="fKm" type="text" inputmode="tel" autocomplete="off" placeholder="เช่น 145+200"><div class="hint" id="kmHint"></div></div>' +
+      (bd ? '<div class="f"><label>พิกัดแปลงที่ดิน</label><input id="fParcel" type="text" autocomplete="off" maxlength="100" placeholder="เช่น 12.6789, 101.2345"></div>'
+          : '<div class="f"><label>กิโลเมตร</label><input id="fKm" type="text" inputmode="tel" autocomplete="off" placeholder="เช่น 145+200"><div class="hint" id="kmHint"></div></div>') +
       '<div class="f"><label>หมายเหตุ (ไม่บังคับ)</label><input id="fNote" type="text" maxlength="200" placeholder="เช่น รถบรรทุกชนเสาไฟ"></div>' +
       '<div class="due" id="due"></div><div class="err" id="err"></div>' +
       '<button class="main" id="go">บันทึกร่าง</button>' +
     '</div>';
   renderHw();
   $('fDate').addEventListener('input', updDue); updDue();
-  $('fKm').addEventListener('input', function(){
+  if ($('fKm')) $('fKm').addEventListener('input', function(){
     var v = parseKm($('fKm').value), h = $('kmHint');
     h.textContent = $('fKm').value.trim() === '' ? '' : (v === null ? 'พิมพ์เป็น กม.+เมตร เช่น 145+200' : 'กม.' + Math.floor(v / 1000) + '+' + ('00' + (v % 1000)).slice(-3));
   });
@@ -226,13 +227,15 @@ function updDue(){
 }
 function submit(force){
   if (busy) return;
-  var d = $('fDate').value, km = parseKm($('fKm').value), err = $('err'); err.textContent = '';
+  var bd = sysKey === 'boundary', d = $('fDate').value, err = $('err'); err.textContent = '';
+  var km = bd ? null : parseKm($('fKm').value), parcel = bd ? $('fParcel').value.trim() : '';
   if (!d) { err.textContent = 'เลือกวันที่'; return; }
-  if (d > ymd(new Date())) { err.textContent = 'วันที่เป็นอนาคตไม่ได้'; return; }
+  if (!bd && d > ymd(new Date())) { err.textContent = 'วันที่เป็นอนาคตไม่ได้'; return; }
   if (!selHw) { err.textContent = 'เลือกทางหลวง'; return; }
-  if (km === null || $('fKm').value.trim() === '') { err.textContent = 'กรอกกิโลเมตร เช่น 145+200'; return; }
+  if (bd) { if (!parcel) { err.textContent = 'กรอกพิกัดแปลงที่ดิน'; return; } }
+  else if (km === null || $('fKm').value.trim() === '') { err.textContent = 'กรอกกิโลเมตร เช่น 145+200'; return; }
   busy = true; $('go').disabled = true; $('go').textContent = 'กำลังบันทึก…';
-  api({ action: 'create', sys: sysKey, startDate: d, highway: selHw, km: km, note: $('fNote').value.trim(), force: !!force }).catch(function(e){
+  api({ action: 'create', sys: sysKey, startDate: d, highway: selHw, km: km, parcel: parcel, note: $('fNote').value.trim(), force: !!force }).catch(function(e){
     return { ok: false, error: e && e.message ? e.message : 'เชื่อมต่อไม่ได้ ตรวจสัญญาณแล้วกดอีกครั้ง' };
   }).then(function(res){
     busy = false; $('go').disabled = false; $('go').textContent = 'บันทึกร่าง';
