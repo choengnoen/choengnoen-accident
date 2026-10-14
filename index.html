@@ -987,7 +987,8 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .gd-doc .ic{flex:none;width:20px;text-align:right;color:var(--ink-mute)}
 .gd-doc .q{margin-left:auto;font-size:12.5px;color:var(--ink-mute);white-space:nowrap}
 .gd-doc small{color:var(--amber-deep)}
-.gd-meta{display:flex;gap:10px 22px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--ink-soft)}
+.gd-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:12px;font-size:13px;color:var(--ink-soft)}
+@media (max-width:760px){.gd-meta{grid-template-columns:1fr}}
 .gd-meta b{color:var(--ink)}
 /* เอกสารประกอบงาน แบบ 4: แถบขั้นตอน + แผงรายละเอียด */
 .gd-strip{display:grid;grid-template-columns:repeat(var(--n,4),1fr);gap:0;margin:18px 0 6px}
@@ -5222,7 +5223,7 @@ const GUIDE_DATA = {
   ],
   docTitle: 'เอกสารประกอบงาน',
   sections: [{
-    title: '4. งานอุบัติเหตุบนทางหลวง — 4.1 กรณีทรัพย์สินของกรมทางหลวงเสียหาย หรือไม่เสียหายแต่เป็นเหตุการณ์ที่ร้ายแรง',
+    title: 'กรณีทรัพย์สินของกรมทางหลวงเสียหาย หรือไม่เสียหายแต่เป็นเหตุการณ์ที่ร้ายแรง',
     tag: 'งานสถิติหมวดการทาง',
     /* แถบขั้นตอนบนหัวเอกสาร (hot = ขั้นที่ต้องทำทันที) */
     strip: [
