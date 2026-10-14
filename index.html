@@ -910,6 +910,14 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .cd-age{flex:none;border-left:1px solid var(--line);padding-left:14px;display:flex;flex-direction:column;justify-content:center;min-width:100px}
 .cd-age span{font-size:12px;color:var(--ink-mute)}.cd-age b{font-family:'Kanit',sans-serif;font-size:20px;line-height:1.2}
 .cd-na{color:#9aa3ad;font-weight:400}.cd-nw{white-space:nowrap}
+.cd-ins{margin-top:12px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper-2);font-size:14px}
+.cd-ins-top{display:flex;align-items:center;gap:8px}
+.cd-ins-k{color:var(--ink-mute);font-size:13px}
+.cd-ins-badge{font-weight:700;font-size:12.5px;line-height:1;padding:4px 10px;border-radius:999px;background:#e5e8ec;color:#5c6773}
+.cd-ins.yes{background:#f2faf6;border-color:#bfe3cf}.cd-ins.yes .cd-ins-badge{background:#d7f0e1;color:#1c7a4d}
+.cd-ins-co{margin-top:6px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.cd-ins-tel{margin-top:3px;display:flex;gap:8px;align-items:baseline;font-weight:500}
+.cd-ins-tel a{color:inherit;text-decoration:none}
 .cd-dl dd a{color:inherit;text-decoration:none}
 @media(max-width:760px){.cd-prog{flex-direction:column}.cd-steps{grid-template-columns:1fr;gap:10px}.cd-st{flex-direction:row;align-items:center;text-align:left;gap:8px;flex-wrap:wrap}.cd-st::before{display:none}.cd-st b{margin-top:0}.cd-age{border-left:0;border-top:1px solid var(--line);padding:8px 0 0;flex-direction:row;gap:8px;align-items:baseline}}
 .cd-cols{display:grid;grid-template-columns:1fr 1.1fr;gap:14px;align-items:start}
@@ -1109,7 +1117,8 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .snap .cd-photos{gap:8px}
 .snap .cd-photo{aspect-ratio:4/3}
 .snap .snap-items2{display:grid;grid-template-columns:1fr 1fr;column-gap:20px}
-.snap .cd-item{padding:4px 0}
+.snap .cd-item{padding:4px 0;align-items:flex-start;align-self:stretch}
+.snap .snap-items2 .cd-item{line-height:1.45}
 .snap .cd-item b{font-size:13px}
 .snap .cd-q{font-size:11.5px}
 .snap .cd-receipt{padding:8px 13px;margin-top:8px}
@@ -4758,7 +4767,7 @@ function shortInsurerName(name, maxLen){
   return (maxLen && s.length > maxLen) ? s.slice(0, maxLen) + '…' : s;
 }
 // ผู้ละเมิด/คู่กรณี 1 คน ในหน้าต่างรายละเอียดเคส (แบบ ข: ข้อมูลทุกอย่างเป็นแถว "หัวข้อ – ค่า" เหมือนการ์ดอื่น ไม่มีวงกลมตัวอักษร)
-// extraRows = แถว <dt>/<dd> เพิ่มท้ายรายการ (ใช้ใส่ข้อมูลประกันของผู้ละเมิดหลัก)
+// extraRows = HTML เพิ่มต่อท้ายตารางข้อมูล (ใช้ใส่กล่อง "ประกันภัย" ของผู้ละเมิดหลัก — แยกเป็นบล็อกของตัวเอง ไม่ปนกับแถวหัวข้อ–ค่า)
 // ช่องที่ยังไม่มีข้อมูล แสดง "ยังไม่ระบุ" สีเทาจาง แทนขีด "-" (แยกชัดว่าไม่ใช่ค่าที่กรอกไว้)
 const CD_NA = '<span class="cd-na">ยังไม่ระบุ</span>';
 function cdVal(v){ const s = v == null ? '' : String(v).trim(); return s ? escapeHtml(s) : CD_NA; }
@@ -4774,8 +4783,8 @@ function caseDetailPersonHtml(p, label, extraRows){
       ${p.driverAge ? `<dt>อายุ</dt><dd>${escapeHtml(p.driverAge)} ปี</dd>` : ''}
       <dt>ประเภทรถ</dt><dd>${cdVal(p.vehicleType)}</dd>
       <dt>ยี่ห้อ / สี</dt><dd>${cdVal(p.vehicleBrand)}</dd>
-      ${plateRows}${extraRows || ''}
-    </dl>`;
+      ${plateRows}
+    </dl>${extraRows || ''}`;
 }
 
 // หน้าต่างรายละเอียดเคส (แบบ ข): หัวสีกรมท่า → แผ่นสถานะ 4 ช่อง → การ์ดข้อมูล/ผู้ละเมิด + รายการทรัพย์สินพร้อมใบสรุปเงิน → ปุ่มตรึงด้านล่าง
@@ -5006,7 +5015,13 @@ function openCaseDetailModal(id){
 
   const others = rec.otherPartiesList || [];
   const insTel = String(rec.insurancePhone || '').replace(/[^\d+]/g, '');
-  const insuranceRows = `<dt>ประกันภัย</dt><dd>${escapeHtml(rec.hasInsurance) || 'ไม่ระบุ'}</dd>${rec.hasInsurance === 'มี' ? `<dt>บริษัทประกัน</dt><dd>${cdVal(rec.insuranceCompany)}</dd><dt>เบอร์ประกัน</dt><dd>${insTel ? `<a href="tel:${insTel}">${escapeHtml(String(rec.insurancePhone).trim())}</a>` : CD_NA}</dd>` : ''}`;
+  // กล่อง "ประกันภัย": ป้ายสถานะ (มี/ไม่มี/ไม่ระบุ) · ชื่อบริษัทเต็มบรรทัด · เบอร์โทรอยู่บรรทัดถัดมา
+  const insState = rec.hasInsurance === 'มี' ? 'yes' : (rec.hasInsurance === 'ไม่มี' ? 'no' : 'n');
+  const insuranceRows = `<div class="cd-ins ${insState}">
+      <div class="cd-ins-top"><span class="cd-ins-k">ประกันภัย</span><span class="cd-ins-badge">${escapeHtml(rec.hasInsurance) || 'ไม่ระบุ'}</span></div>
+      ${insState === 'yes' ? `<div class="cd-ins-co">${cdVal(rec.insuranceCompany)}</div>
+      <div class="cd-ins-tel"><span class="cd-ins-k">โทร</span>${insTel ? `<a href="tel:${insTel}">${escapeHtml(String(rec.insurancePhone).trim())}</a>` : CD_NA}</div>` : ''}
+    </div>`;
   const mainParty = { vehicleType: rec.vehicleType, vehicleBrand: rec.vehicleBrand, plate: rec.plate, trailerPlate: rec.trailerPlate, driverName: rec.driverName, driverPhone: rec.driverPhone, driverAge: rec.driverAge };
 
   const root = document.getElementById('modalRoot');
@@ -5017,7 +5032,6 @@ function openCaseDetailModal(id){
           <div class="cd-band">
             <img src="logo.png" alt="ตรากรมทางหลวง" data-cn-emblem class="cd-logo">
             <div class="cd-type">รายละเอียดอุบัติเหตุ</div>
-            <div class="cd-pills"><span class="cd-pill">เกิดเหตุเมื่อ ${escapeHtml(formatThaiDate(rec.dateIncident))}${rec.time ? ' · ' + escapeHtml(String(rec.time).replace(/\s*น\.?$/, '')) + ' น.' : ''}</span></div>
             <div class="cd-hd-actions"><button class="cd-copy" id="caseDetailCopy" type="button" title="คัดลอกเป็นรูป" aria-label="คัดลอกเป็นรูป"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button><button class="modal-close" id="caseDetailCloseX" type="button">×</button></div>
           </div>
           <div class="cd-cells">
@@ -5032,6 +5046,7 @@ function openCaseDetailModal(id){
             <div>
               <div class="cd-card"><div class="cd-sec">ข้อมูลอุบัติเหตุ</div>
                 <dl class="cd-dl">
+                  <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDate(rec.dateIncident) + (rec.time ? ' · ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
                   <dt>ตำแหน่ง</dt><dd>${cdVal(formatPosition(rec))}</dd>
                   <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
                   <dt>พื้นที่</dt><dd>${cdVal(zoneAreaText(rec))}</dd>
