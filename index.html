@@ -839,7 +839,7 @@ tr.asset-frequent:hover td{background:#fbe9c9 !important}
 .dsel-item.sel{font-weight:600}
 .dsel-tick{color:var(--amber);font-size:13px;margin-left:12px}
 .dsel.it-preset{width:190px;padding:0;border:0;border-radius:0;background:none}
-.dsel.it-preset .dsel-btn{border-radius:10px;padding:9px 12px;font-size:14px}.ins-row{grid-template-columns:1fr 2fr}
+.dsel.it-preset .dsel-btn{border-radius:10px;padding:9px 12px;font-size:14px}.ins-row{grid-template-columns:1fr 1.6fr 1.1fr}
 @media(max-width:720px){.ins-row{grid-template-columns:1fr}}
 .ref-field{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;transition:border-color .15s ease,box-shadow .15s ease}
 .ref-field:focus-within{border-color:var(--amber-500);box-shadow:0 0 0 3px rgba(224,98,15,.14)}
@@ -892,11 +892,31 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .cd-tile .cd-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex:none}
 .cd-tile.warn .cd-ic{background:var(--spot2-bg)}.cd-tile.ok .cd-ic{background:var(--green-bg)}.cd-tile.bad .cd-ic{background:var(--rust-bg)}.cd-tile.n .cd-ic{background:var(--paper-2)}
 .cd-tile b{display:block;font-size:14px;line-height:1.3}.cd-tile span{font-size:12px;color:var(--ink-mute)}
+/* เส้นความคืบหน้าของเรื่อง (แทนแผ่นสถานะ 4 ช่อง): เขียว = เสร็จแล้ว · ส้ม = ยังไม่เสร็จ · แดง = เลยกำหนดส่งเอกสาร · เทา = ไม่ระบุ */
+.cd-prog{display:flex;align-items:stretch;gap:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:14px}
+.cd-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,1fr);flex:1;min-width:0}
+.cd-st{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;min-width:0;padding:0 4px}
+.cd-st::before{content:'';position:absolute;top:13px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.cd-st:first-child::before{display:none}
+.cd-st.ok::before{background:#1f9d6b}
+.cd-dot{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;line-height:1;background:var(--paper-2);color:var(--ink-mute);box-shadow:0 0 0 1px var(--line),0 0 0 3px #fff}
+.cd-st.ok .cd-dot{background:#d7f0e1;color:#1c8a53;box-shadow:0 0 0 1px #1f9d6b,0 0 0 3px #fff}
+.cd-st.warn .cd-dot{background:#FAEEDA;color:#a85d00;box-shadow:0 0 0 1px #e59a14,0 0 0 3px #fff}
+.cd-st.bad .cd-dot{background:#FCEBEB;color:#b3261e;box-shadow:0 0 0 1px #d64545,0 0 0 3px #fff}
+.cd-st b{font-size:13.5px;line-height:1.25;margin-top:5px}
+.cd-ss{font-size:12.5px;line-height:1.25;color:var(--ink-mute);overflow-wrap:anywhere}
+.cd-st.ok .cd-ss{color:#1c7a4d}.cd-st.warn .cd-ss{color:#a85d00;font-weight:600}.cd-st.bad .cd-ss{color:#b3261e;font-weight:700}
+.cd-sn{font-size:11.5px;line-height:1.25;color:var(--ink-mute)}
+.cd-age{flex:none;border-left:1px solid var(--line);padding-left:14px;display:flex;flex-direction:column;justify-content:center;min-width:100px}
+.cd-age span{font-size:12px;color:var(--ink-mute)}.cd-age b{font-family:'Kanit',sans-serif;font-size:20px;line-height:1.2}
+.cd-na{color:#9aa3ad;font-weight:400}.cd-nw{white-space:nowrap}
+.cd-dl dd a{color:inherit;text-decoration:none}
+@media(max-width:760px){.cd-prog{flex-direction:column}.cd-steps{grid-template-columns:1fr;gap:10px}.cd-st{flex-direction:row;align-items:center;text-align:left;gap:8px;flex-wrap:wrap}.cd-st::before{display:none}.cd-st b{margin-top:0}.cd-age{border-left:0;border-top:1px solid var(--line);padding:8px 0 0;flex-direction:row;gap:8px;align-items:baseline}}
 .cd-cols{display:grid;grid-template-columns:1fr 1.1fr;gap:14px;align-items:start}
 .cd-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
 .cd-sec{font-family:'Kanit',sans-serif;font-weight:600;font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px;color:var(--ink)}
 .cd-count{margin-left:auto;font-family:'Sarabun',sans-serif;font-weight:600;font-size:12.5px;background:var(--paper-2);color:var(--ink-soft);border-radius:999px;padding:2px 11px}
-.cd-dl{margin:0;display:grid;grid-template-columns:104px 1fr;gap:6px 10px;font-size:14px}
+.cd-dl{margin:0;display:grid;grid-template-columns:116px 1fr;gap:6px 10px;font-size:14px}
 .cd-dl dt{color:var(--ink-mute)}.cd-dl dd{margin:0;font-weight:500;min-width:0;overflow-wrap:anywhere}
 .cd-k{font-size:12px;color:var(--ink-mute)}
 .cd-person{display:flex;gap:12px;align-items:center;margin-bottom:10px}
@@ -1080,7 +1100,10 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .snap .cd-tile{padding:6px 10px}
 .snap .cd-card{padding:9px 12px;margin-bottom:0}
 .snap .cd-sec{font-size:14px;margin-bottom:6px}
-.snap .cd-dl.wide{display:grid;grid-template-columns:62px 1fr 62px 1fr;gap:3px 8px;font-size:13px}
+.snap .cd-dl.wide{display:grid;grid-template-columns:82px 1fr 82px 1fr;gap:3px 8px;font-size:13px}
+.snap .cd-dl.wide dt{white-space:nowrap}
+.snap .cd-prog{padding:8px 12px;margin-bottom:0;gap:10px}
+.snap .cd-st b{font-size:13px}.snap .cd-ss{font-size:12px}
 .snap .cd-dl.wide dd.full{grid-column:2 / -1}
 .snap .cd-divider{margin:8px 0}
 .snap .cd-photos{gap:8px}
@@ -1153,7 +1176,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
     <div class="form-main">
     <div class="card" id="fsec1">
       <div class="section-title"><span class="num">1</span> ข้อมูลอุบัติเหตุ</div>
-      <div class="grid grid-4">
+      <div class="grid grid-3">
         <div class="field">
           <label>ปีงบประมาณ <span class="req">*</span></label>
           <select id="f_fiscalYear"></select>
@@ -1161,10 +1184,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         <div class="field">
           <label>วันที่เกิดเหตุ <span class="req">*</span></label>
           <input type="date" id="f_dateIncident">
-        </div>
-        <div class="field">
-          <label>วันที่ตรวจพบ</label>
-          <input type="date" id="f_dateFound">
         </div>
         <div class="field">
           <label>เวลา</label>
@@ -1292,6 +1311,10 @@ tr.route-editable:hover td{background:var(--amber-glow)}
               <input type="text" id="f_insuranceCompany" autocomplete="off" placeholder="เลือกจากรายชื่อ หรือพิมพ์ชื่อบริษัท">
               <div class="it-dd" id="insurerDd" style="display:none"></div>
             </div>
+          </div>
+          <div class="field" id="f_insurancePhoneWrap" style="display:none">
+            <label>เบอร์โทรบริษัทประกัน</label>
+            <input type="tel" id="f_insurancePhone" autocomplete="off" inputmode="tel" placeholder="เช่น 1484 หรือ 02-xxx-xxxx">
           </div>
         </div>
       </div>
@@ -1576,7 +1599,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
       </div>
       <div class="card" id="cardInsurer" style="display:none">
         <div class="section-title">🏷 จัดระเบียบข้อมูล</div>
-        <p class="hint">รวมชื่อบริษัทประกันที่พิมพ์ไม่เหมือนกัน และแก้รูปแบบเลขที่หนังสืออ้างอิงให้ตรงกัน (ดูตัวอย่างก่อนปรับ)</p>
+        <p class="hint">รวมชื่อบริษัทประกันที่พิมพ์ไม่เหมือนกัน แก้รูปแบบเลขที่หนังสืออ้างอิงให้ตรงกัน และลบข้อมูล "วันที่ตรวจพบ" เดิมที่เลิกใช้แล้ว (ดูตัวอย่างก่อนปรับ)</p>
         <button class="btn btn-outline" id="btnInsurerCleanup" type="button">ตรวจและจัดระเบียบ</button>
       </div>
     </div>
@@ -3301,7 +3324,18 @@ function updateInsuranceFieldVisibility(){
   const wrap = document.getElementById('f_insuranceCompanyWrap');
   const hasIns = document.getElementById('f_hasInsurance').value === 'มี';
   wrap.style.display = hasIns ? '' : 'none';
-  if (!hasIns) document.getElementById('f_insuranceCompany').value = '';
+  document.getElementById('f_insurancePhoneWrap').style.display = hasIns ? '' : 'none';
+  if (!hasIns) { document.getElementById('f_insuranceCompany').value = ''; document.getElementById('f_insurancePhone').value = ''; }
+}
+// เลือกบริษัทประกันแล้วช่องเบอร์ยังว่าง → เติมเบอร์ที่เคยบันทึกไว้กับบริษัทเดียวกัน (เคสล่าสุดก่อน) ผู้ใช้แก้ทับได้
+function autofillInsurerPhone(){
+  const phoneEl = document.getElementById('f_insurancePhone');
+  if (phoneEl.value.trim()) return;
+  const name = normalizeInsurer(document.getElementById('f_insuranceCompany').value);
+  if (!name) return;
+  const hit = records.filter(r => r.insurancePhone && normalizeInsurer(r.insuranceCompany) === name)
+    .sort((a, b) => String(b.dateIncident || '').localeCompare(String(a.dateIncident || '')))[0];
+  if (hit) phoneEl.value = hit.insurancePhone;
 }
 const VEHICLE_TYPE_OPTIONS = ['รถยนต์นั่งส่วนบุคคล','รถกระบะ','รถบรรทุก','รถพ่วง','รถโดยสาร','รถตู้','รถจักรยานยนต์','เครื่องจักรกล','อื่นๆ'];
 function otherPartyVehicleOptionsHtml(selected){
@@ -3486,7 +3520,7 @@ function updateZoneFields(fromRemote){
         : 'ยังโหลดเขตพื้นที่จากฐานข้อมูลกลางไม่ได้ — กรอก สภ./ตำบล/อำเภอ เอง หรือรีเฟรชหน้า';
       hint.classList.add('warn');
     } else {
-      hint.textContent = 'เลือกสายทางและ กม. ระบบจะเติม สภ./ตำบล/อำเภอ/หมู่ จากฐานข้อมูลกลางให้อัตโนมัติ (แก้เองได้)';
+      hint.textContent = '';
       hint.classList.remove('warn');
     }
   }
@@ -3783,7 +3817,6 @@ function clearForm(){
   document.getElementById('btnClearForm').textContent = 'ยกเลิก';
   populateFiscalYearSelect();
   document.getElementById('f_dateIncident').value = '';
-  document.getElementById('f_dateFound').value = '';
   document.getElementById('f_time').value = '';
   refreshHighwayOptions(); // ตัดตัวเลือกชั่วคราวของสายทางที่โอนแล้วออก (ถ้ามี)
   document.getElementById('f_highway').value = '';
@@ -3801,6 +3834,7 @@ function clearForm(){
   document.getElementById('f_trailerPlate').value = '';
   document.getElementById('f_hasInsurance').value = '';
   document.getElementById('f_insuranceCompany').value = '';
+  document.getElementById('f_insurancePhone').value = '';
   document.getElementById('f_driverName').value = '';
   document.getElementById('f_driverAge').value = '';
   document.getElementById('f_driverPhone').value = '';
@@ -3844,7 +3878,6 @@ function loadRecordIntoForm(rec){
   document.getElementById('btnClearForm').textContent = 'ยกเลิกการแก้ไข';
   document.getElementById('f_fiscalYear').value = rec.fiscalYear || thaiFiscalYearNow();
   document.getElementById('f_dateIncident').value = rec.dateIncident || '';
-  document.getElementById('f_dateFound').value = rec.dateFound || '';
   // ข้อมูลเก่าเป็นข้อความอิสระ (เช่น "14.30 น.") — แปลงเป็น HH:MM ให้ช่องเลือกเวลาแสดงได้
   (function () {
     const m = String(rec.time || '').match(/(\d{1,2})\s*[:.]\s*(\d{2})/);
@@ -3871,6 +3904,7 @@ function loadRecordIntoForm(rec){
   updateTrailerFieldVisibility();
   document.getElementById('f_hasInsurance').value = rec.hasInsurance || '';
   document.getElementById('f_insuranceCompany').value = rec.insuranceCompany || '';
+  document.getElementById('f_insurancePhone').value = rec.insurancePhone || '';
   updateInsuranceFieldVisibility();
   document.getElementById('otherPartiesContainer').innerHTML = '';
   otherPartyIdx = 0;
@@ -3971,7 +4005,7 @@ async function saveForm(){
   const rec = {
     id: editingId || uid(),
     fiscalYear, dateIncident,
-    dateFound: document.getElementById('f_dateFound').value,
+    dateFound: '',   // เลิกใช้ "วันที่ตรวจพบ" แล้ว — บันทึกครั้งใดก็ล้างค่าเดิมของเคสนั้นทิ้ง
     time: document.getElementById('f_time').value.trim(),
     highway, section: document.getElementById('f_section').value,
     km, side: document.getElementById('f_side').value,
@@ -3991,6 +4025,7 @@ async function saveForm(){
     trailerPlate: document.getElementById('f_trailerPlate').value.trim(),
     hasInsurance: document.getElementById('f_hasInsurance').value,
     insuranceCompany: normalizeInsurer(document.getElementById('f_insuranceCompany').value),
+    insurancePhone: document.getElementById('f_hasInsurance').value === 'มี' ? document.getElementById('f_insurancePhone').value.trim() : '',
     otherPartiesList: collectOtherPartiesFromForm(),
     driverName: document.getElementById('f_driverName').value.trim(),
     driverAge: document.getElementById('f_driverAge').value.trim(),
@@ -4642,8 +4677,10 @@ function initReferenceNoField(){
 /* ===== จัดระเบียบข้อมูลเดิม (เจ้าของระบบ): ชื่อบริษัทประกันที่พิมพ์ไม่เหมือนกัน + รูปแบบเลขที่หนังสืออ้างอิง ===== */
 function buildInsurerCleanupPlan(){
   const changes = [], groups = {}, refPairs = {};
+  let foundCount = 0;
   records.forEach(r => {
     const patch = {};
+    if (String(r.dateFound || '').trim()) { patch.dateFound = ''; foundCount++; }   // เลิกใช้ "วันที่ตรวจพบ": ล้างค่าเดิมของทุกเคส
     const curIns = String(r.insuranceCompany || '');
     if (curIns.trim()) {
       const to = normalizeInsurer(curIns);
@@ -4656,11 +4693,11 @@ function buildInsurerCleanupPlan(){
     }
     if (Object.keys(patch).length) changes.push({ rec: r, patch });
   });
-  return { changes, groups, refPairs };
+  return { changes, groups, refPairs, foundCount };
 }
 function openInsurerCleanupModal(){
   if (!isPrivileged()) { showToast('เฉพาะเจ้าของระบบหรือผู้ดูแลระบบเท่านั้น'); return; }
-  const { changes, groups, refPairs } = buildInsurerCleanupPlan();
+  const { changes, groups, refPairs, foundCount } = buildInsurerCleanupPlan();
   const root = document.getElementById('modalRoot');
   const names = Object.keys(groups).sort(naturalCompareTh);
   const insHtml = names.length ? `<div class="em-sec" style="margin-top:0">ชื่อบริษัทประกัน</div>` + names.map(to => `
@@ -4678,6 +4715,7 @@ function openInsurerCleanupModal(){
       <div class="modal-body em-body">
         ${changes.length ? `
           <p class="em-hint" style="margin:0 0 12px">พบ <b>${changes.length} เคส</b> ที่รูปแบบข้อมูลไม่ตรงกัน จะปรับตามด้านล่าง (ดูตัวอย่างก่อน ยังไม่มีอะไรถูกแก้จนกว่าจะกดปุ่มยืนยัน)</p>
+          ${foundCount ? `<div class="em-sec" style="margin-top:0">ลบข้อมูล "วันที่ตรวจพบ" (เลิกใช้แล้ว)</div><div class="ic-group"><div class="ic-from"><span>เคสที่เคยกรอกวันที่ตรวจพบไว้ — ค่านี้จะถูกลบถาวร</span><b>${foundCount} เคส</b></div></div>` : ''}
           ${insHtml}${refHtml}` : `<p class="em-hint" style="margin:0">ข้อมูลทุกเคสเป็นรูปแบบเดียวกันแล้ว ไม่ต้องปรับ</p>`}
       </div>
       <div class="cd-foot">
@@ -4721,18 +4759,21 @@ function shortInsurerName(name, maxLen){
 }
 // ผู้ละเมิด/คู่กรณี 1 คน ในหน้าต่างรายละเอียดเคส (แบบ ข: ข้อมูลทุกอย่างเป็นแถว "หัวข้อ – ค่า" เหมือนการ์ดอื่น ไม่มีวงกลมตัวอักษร)
 // extraRows = แถว <dt>/<dd> เพิ่มท้ายรายการ (ใช้ใส่ข้อมูลประกันของผู้ละเมิดหลัก)
+// ช่องที่ยังไม่มีข้อมูล แสดง "ยังไม่ระบุ" สีเทาจาง แทนขีด "-" (แยกชัดว่าไม่ใช่ค่าที่กรอกไว้)
+const CD_NA = '<span class="cd-na">ยังไม่ระบุ</span>';
+function cdVal(v){ const s = v == null ? '' : String(v).trim(); return s ? escapeHtml(s) : CD_NA; }
 function caseDetailPersonHtml(p, label, extraRows){
   const plateRows = (p.vehicleType === 'รถพ่วง' && p.trailerPlate)
-    ? `<dt>ทะเบียนหัว</dt><dd>${p.plate ? `<span class="cd-plate">${escapeHtml(p.plate)}</span>` : '-'}</dd>
+    ? `<dt>ทะเบียนหัว</dt><dd>${p.plate ? `<span class="cd-plate">${escapeHtml(p.plate)}</span>` : CD_NA}</dd>
        <dt>ทะเบียนหาง</dt><dd><span class="cd-plate">${escapeHtml(p.trailerPlate)}</span></dd>`
-    : `<dt>ทะเบียนรถ</dt><dd>${p.plate ? `<span class="cd-plate">${escapeHtml(p.plate)}</span>` : '-'}</dd>`;
+    : `<dt>ทะเบียนรถ</dt><dd>${p.plate ? `<span class="cd-plate">${escapeHtml(p.plate)}</span>` : CD_NA}</dd>`;
   return `${label ? `<div class="cd-k" style="font-weight:600;margin-bottom:6px">${escapeHtml(label)}</div>` : ''}
     <dl class="cd-dl">
       <dt>ชื่อ</dt><dd>${escapeHtml(p.driverName) || 'ไม่ระบุชื่อ'}</dd>
-      <dt>โทร</dt><dd>${escapeHtml(p.driverPhone) || '-'}</dd>
+      <dt>โทร</dt><dd>${cdVal(p.driverPhone)}</dd>
       ${p.driverAge ? `<dt>อายุ</dt><dd>${escapeHtml(p.driverAge)} ปี</dd>` : ''}
-      <dt>ประเภทรถ</dt><dd>${escapeHtml(p.vehicleType) || '-'}</dd>
-      <dt>ยี่ห้อ / สี</dt><dd>${escapeHtml(p.vehicleBrand) || '-'}</dd>
+      <dt>ประเภทรถ</dt><dd>${cdVal(p.vehicleType)}</dd>
+      <dt>ยี่ห้อ / สี</dt><dd>${cdVal(p.vehicleBrand)}</dd>
       ${plateRows}${extraRows || ''}
     </dl>`;
 }
@@ -4793,7 +4834,7 @@ async function buildCaseImage(){
   });
   const mk = (cls, kids) => { const d = document.createElement('div'); if (cls) d.className = cls; (kids || []).forEach(k => k && d.appendChild(k)); return d; };
   const hd = clone.querySelector('.cd-hd');
-  const tiles = clone.querySelector('.cd-tiles');
+  const tiles = clone.querySelector('.cd-prog');
   const cards = [...clone.querySelectorAll('.cd-card')];
   const by = re => cards.find(c => { const s = c.querySelector('.cd-sec'); return s && re.test(s.textContent); });
   const cInfo = by(/ข้อมูลอุบัติเหตุ/), cPerson = by(/ผู้ละเมิด/), cRef = by(/อ้างอิง/), cPhoto = by(/รูปถ่าย/), cItems = by(/ทรัพย์สิน/);
@@ -4832,7 +4873,7 @@ async function buildCaseImage(){
   body.appendChild(mk('snap-col', [tiles, grid]));
   const stamp = document.createElement('div');
   stamp.className = 'snap-stamp';
-  stamp.textContent = 'ระบบงานอุบัติเหตุ · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) + ' น.';
+  stamp.textContent = 'ระบบงานอุบัติเหตุ · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + (() => { const n = new Date(), z = x => String(x).padStart(2, '0'); return formatThaiDate(n.getFullYear() + '-' + z(n.getMonth() + 1) + '-' + z(n.getDate())) + ' ' + z(n.getHours()) + ':' + z(n.getMinutes()); })() + ' น.';
   shell.append(hd, body, stamp);
 
   const stage = document.createElement('div');
@@ -4909,18 +4950,41 @@ function openCaseDetailModal(id){
   const end = isClosed ? new Date(rec.closedDate + 'T00:00:00') : new Date();
   const days = isNaN(start.getTime()) ? null : Math.max(0, Math.floor((end - start) / 86400000));
 
-  const tile = (cls, icon, label, value) => `<div class="cd-tile ${cls}"><div class="cd-ic">${icon}</div><div><span>${label}</span><b>${value}</b></div></div>`;
+  // เส้นความคืบหน้า 6 ขั้น: เกิดเหตุ → แจ้งความ → ส่งเอกสารถึงแขวง → ชดใช้ → จัดซ่อม → ยุติเรื่อง
+  //   เขียว ✓ = เสร็จแล้ว · ส้ม ! = ยังไม่เสร็จ · แดง ! = เลยกำหนดส่งเอกสาร · เทา = ไม่ระบุ
+  // กติกา 10 วันทำการใช้กับ "ส่งเอกสารถึงแขวง" เท่านั้น: กำหนด = วันเกิดเหตุ + 10 วันทำการ (ไม่นับเสาร์-อาทิตย์/วันหยุด — ใช้ตัวคำนวณเดียวกับตารางรายการร่าง)
+  const step = (cls, label, sub, note) => `<li class="cd-st ${cls}"><span class="cd-dot">${cls === 'ok' ? '✓' : (cls === 'n' ? '–' : '!')}</span><b>${label}</b><span class="cd-ss">${sub}</span>${note ? `<span class="cd-sn">${note}</span>` : ''}</li>`;
   const doneCls = (v, ok) => !v ? 'n' : (v === ok ? 'ok' : 'warn');
-  // 4 กล่องแบ่งเป็น 2 ฝั่ง ให้ความกว้างตรงกับสองคอลัมน์ด้านล่าง (ซ้าย = ชดใช้/จัดซ่อม, ขวา = ยุติเรื่อง/ระยะเวลา)
-  const tilesHtml = `<div class="cd-tiles">
-      <div class="cd-tpair">
-        ${tile(doneCls(rec.compensationStatus, 'ชดใช้แล้ว'), '💰', 'การชดใช้', escapeHtml(rec.compensationStatus || 'ไม่ระบุ'))}
-        ${tile(doneCls(rec.repairStatus, 'จัดซ่อมแล้ว'), '🔧', 'การจัดซ่อม', escapeHtml(rec.repairStatus || 'ไม่ระบุ'))}
-      </div>
-      <div class="cd-tpair">
-        ${tile(isClosed ? 'ok' : 'bad', '📁', 'การยุติเรื่อง', isClosed ? 'ยุติแล้ว ' + escapeHtml(formatThaiDate(rec.closedDate)) : 'ยังไม่ยุติ')}
-        ${tile('n', '⏱', isClosed ? 'ใช้เวลาจนยุติ' : 'ระยะเวลาค้าง', days === null ? '-' : days.toLocaleString('th-TH') + ' วัน')}
-      </div>
+  const p2 = n => String(n).padStart(2, '0');
+  const nowD = new Date();
+  const todayStr = nowD.getFullYear() + '-' + p2(nowD.getMonth() + 1) + '-' + p2(nowD.getDate());
+  const incStr = normalizeDateStr(rec.dateIncident);
+  const sentStr = normalizeDateStr(rec.sentToDistrictDate);
+  const wd = window.DRAFTS && DRAFTS.addWorkdays && DRAFTS.workLeft ? DRAFTS : null;
+  let docCls = 'n', docSub = incStr ? 'ยังไม่ระบุวันส่ง' : 'ยังไม่ระบุวันเกิดเหตุ', docNote = '';
+  if (sentStr) {
+    docCls = 'ok'; docSub = escapeHtml(formatThaiDate(sentStr));
+    if (wd && incStr) { const late = -wd.workLeft(sentStr, wd.addWorkdays(incStr, 10)); if (late > 0) docNote = 'ส่งช้า ' + late + ' วันทำการ'; }
+  } else if (isClosed) {
+    docSub = 'ไม่ได้บันทึกวันส่ง';
+  } else if (wd && incStr) {
+    const due = wd.addWorkdays(incStr, 10), left = wd.workLeft(todayStr, due);
+    docNote = 'กำหนด ' + escapeHtml(formatThaiDate(due));
+    if (left < 0) { docCls = 'bad'; docSub = 'เลยกำหนด <span class="cd-nw">' + (-left) + ' วันทำการ</span>'; }
+    else if (left === 0) { docCls = 'bad'; docSub = due < todayStr ? 'เลยกำหนดแล้ว' : 'ครบกำหนดวันนี้'; }
+    else { docCls = 'warn'; docSub = 'เหลือ <span class="cd-nw">' + left + ' วันทำการ</span>'; }
+  }
+  const hasPolice = !!String(rec.policeReportNo || '').trim();
+  const tilesHtml = `<div class="cd-prog">
+      <ol class="cd-steps">
+        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? escapeHtml(formatThaiDate(incStr)) : 'ยังไม่ระบุ')}
+        ${step(hasPolice ? 'ok' : 'n', 'แจ้งความ', hasPolice ? 'แล้ว' : 'ยังไม่ระบุ')}
+        ${step(docCls, 'ส่งเอกสารถึงแขวง', docSub, docNote)}
+        ${step(doneCls(rec.compensationStatus, 'ชดใช้แล้ว'), 'การชดใช้', escapeHtml(rec.compensationStatus || 'ยังไม่ระบุ'))}
+        ${step(doneCls(rec.repairStatus, 'จัดซ่อมแล้ว'), 'การจัดซ่อม', escapeHtml(rec.repairStatus || 'ยังไม่ระบุ'))}
+        ${step(isClosed ? 'ok' : 'warn', 'ยุติเรื่อง', isClosed ? escapeHtml(formatThaiDate(rec.closedDate)) : 'ยังไม่ยุติ')}
+      </ol>
+      <div class="cd-age"><span>${isClosed ? 'ใช้เวลาจนยุติ' : 'ระยะเวลาค้าง'}</span><b>${days === null ? '-' : days.toLocaleString('th-TH') + ' วัน'}</b></div>
     </div>`;
 
   const itemsHtml = items.length
@@ -4941,7 +5005,8 @@ function openCaseDetailModal(id){
     </div>`;
 
   const others = rec.otherPartiesList || [];
-  const insuranceRows = `<dt>ประกันภัย</dt><dd>${escapeHtml(rec.hasInsurance) || 'ไม่ระบุ'}</dd>${rec.hasInsurance === 'มี' ? `<dt>บริษัทประกัน</dt><dd>${escapeHtml(rec.insuranceCompany) || '-'}</dd>` : ''}`;
+  const insTel = String(rec.insurancePhone || '').replace(/[^\d+]/g, '');
+  const insuranceRows = `<dt>ประกันภัย</dt><dd>${escapeHtml(rec.hasInsurance) || 'ไม่ระบุ'}</dd>${rec.hasInsurance === 'มี' ? `<dt>บริษัทประกัน</dt><dd>${cdVal(rec.insuranceCompany)}</dd><dt>เบอร์ประกัน</dt><dd>${insTel ? `<a href="tel:${insTel}">${escapeHtml(String(rec.insurancePhone).trim())}</a>` : CD_NA}</dd>` : ''}`;
   const mainParty = { vehicleType: rec.vehicleType, vehicleBrand: rec.vehicleBrand, plate: rec.plate, trailerPlate: rec.trailerPlate, driverName: rec.driverName, driverPhone: rec.driverPhone, driverAge: rec.driverAge };
 
   const root = document.getElementById('modalRoot');
@@ -4951,8 +5016,8 @@ function openCaseDetailModal(id){
         <div class="modal-head cd-hd">
           <div class="cd-band">
             <img src="logo.png" alt="ตรากรมทางหลวง" data-cn-emblem class="cd-logo">
-            <div class="cd-type">รายการอุบัติเหตุ</div>
-            <div class="cd-pills"><span class="cd-pill">${escapeHtml(formatThaiDate(rec.dateIncident))}${rec.time ? ' · ' + escapeHtml(String(rec.time).replace(/\s*น\.?$/, '')) + ' น.' : ''}</span></div>
+            <div class="cd-type">รายละเอียดอุบัติเหตุ</div>
+            <div class="cd-pills"><span class="cd-pill">เกิดเหตุเมื่อ ${escapeHtml(formatThaiDate(rec.dateIncident))}${rec.time ? ' · ' + escapeHtml(String(rec.time).replace(/\s*น\.?$/, '')) + ' น.' : ''}</span></div>
             <div class="cd-hd-actions"><button class="cd-copy" id="caseDetailCopy" type="button" title="คัดลอกเป็นรูป" aria-label="คัดลอกเป็นรูป"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button><button class="modal-close" id="caseDetailCloseX" type="button">×</button></div>
           </div>
           <div class="cd-cells">
@@ -4967,11 +5032,10 @@ function openCaseDetailModal(id){
             <div>
               <div class="cd-card"><div class="cd-sec">ข้อมูลอุบัติเหตุ</div>
                 <dl class="cd-dl">
-                  <dt>ตำแหน่ง</dt><dd>${escapeHtml(formatPosition(rec)) || '-'}</dd>
-                  <dt>สภ.</dt><dd>${escapeHtml(rec.policeStation) || '-'}</dd>
-                  <dt>พื้นที่</dt><dd>${escapeHtml(zoneAreaText(rec)) || '-'}</dd>
-                  <dt>หมู่ที่</dt><dd>${escapeHtml(rec.moo) || '-'}</dd>
-                  <dt>วันที่พบ</dt><dd>${escapeHtml(formatThaiDate(rec.dateFound)) || '-'}</dd>
+                  <dt>ตำแหน่ง</dt><dd>${cdVal(formatPosition(rec))}</dd>
+                  <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
+                  <dt>พื้นที่</dt><dd>${cdVal(zoneAreaText(rec))}</dd>
+                  ${rec.moo ? `<dt>หมู่ที่</dt><dd>${escapeHtml(rec.moo)}</dd>` : ''}
                 </dl></div>
               <div class="cd-card"><div class="cd-sec">${others.length ? 'ผู้ละเมิดหลัก' : 'ผู้ละเมิด'}</div>
                 ${caseDetailPersonHtml(mainParty, '', insuranceRows)}
@@ -4979,12 +5043,10 @@ function openCaseDetailModal(id){
               </div>
               <div class="cd-card"><div class="cd-sec">อ้างอิงและหมายเหตุ</div>
                 <dl class="cd-dl">
-                  <dt>เลขที่อ้างอิง</dt><dd style="font-size:13px">${escapeHtml(rec.referenceNo) || '-'}</dd>
-                  <dt>เลขที่แจ้งความ</dt><dd style="font-size:13px">${escapeHtml(rec.policeReportNo) || '-'}</dd>
-                  <dt>วันที่ปิดเคส</dt><dd>${rec.closedDate ? escapeHtml(formatThaiDate(rec.closedDate)) : '-'}</dd>
-                  <dt>ส่งเอกสารถึงแขวง</dt><dd>${rec.sentToDistrictDate ? escapeHtml(formatThaiDate(rec.sentToDistrictDate)) : '-'}</dd>
-                  <dt>หมายเหตุ</dt><dd>${escapeHtml(rec.note) || '-'}</dd>
-                  <dt>ผู้บันทึก</dt><dd>${escapeHtml(rec.recordedBy) || '-'}</dd>
+                  <dt>เลขที่อ้างอิง</dt><dd style="font-size:13px">${cdVal(rec.referenceNo)}</dd>
+                  <dt>เลขที่แจ้งความ</dt><dd style="font-size:13px">${cdVal(rec.policeReportNo)}</dd>
+                  ${rec.note ? `<dt>หมายเหตุ</dt><dd>${escapeHtml(rec.note)}</dd>` : ''}
+                  <dt>ผู้บันทึก</dt><dd>${cdVal(rec.recordedBy)}</dd>
                 </dl></div>
             </div>
             <div>
@@ -5732,7 +5794,6 @@ function buildCasesSheet(wb, rows, seqMap){
     ['เลขที่เคส', 0, 11, 'text', r => (r.fiscalYear || '') + '-' + (seqMap[r.id] || '')],
     ['ปีงบ', 0, 7, 'year', r => Number(r.fiscalYear) || null],
     ['วันที่เกิดเหตุ', 0, 13, 'date', r => xlDate(r.dateIncident)],
-    ['วันที่ตรวจพบ', 0, 13, 'date', r => xlDate(r.dateFound)],
     ['เวลา', 0, 8, 'text', r => r.time || ''],
     ['ทล.', 0, 7, 'text', r => String(r.highway || '')],
     ['ตอน', 0, 24, 'text', r => r.section || ''],
@@ -6769,7 +6830,7 @@ async function init(){
   document.getElementById('btnInsurerCleanup').addEventListener('click', openInsurerCleanupModal);
   initInsurerCombo();
   initReferenceNoField();
-  document.getElementById('f_insuranceCompany').addEventListener('change', e => { e.target.value = normalizeInsurer(e.target.value); });
+  document.getElementById('f_insuranceCompany').addEventListener('change', e => { e.target.value = normalizeInsurer(e.target.value); autofillInsurerPhone(); });
   populateMaterialCategorySelect();
   initItemEntryUi();
 

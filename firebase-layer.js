@@ -815,7 +815,7 @@
     if (typeof phone === 'number') { phone = String(phone); if (/^[689]\d{8}$/.test(phone)) phone = '0' + phone; }
     return {
       id: toStr(r.id), fiscalYear: toNum(r.fiscalYear),
-      dateIncident: toDateStr(r.dateIncident), dateFound: toDateStr(r.dateFound), time: toStr(r.time),
+      dateIncident: toDateStr(r.dateIncident), time: toStr(r.time),
       highway: toStr(r.highway), section: toStr(r.section), km: toNum(r.km), side: toStr(r.side), location: toStr(r.location),
       vehicleType: toStr(r.vehicleType), vehicleBrand: toStr(r.vehicleBrand), plate: toStr(r.plate), trailerPlate: toStr(r.trailerPlate),
       otherParties: toStr(r.otherParties), otherPartiesList: toStr(r.otherPartiesList),
