@@ -983,7 +983,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .gd-ol{margin:0;padding-left:22px;font-size:13.5px;line-height:1.6}
 .gd-ol ul{margin:2px 0 4px;padding-left:18px;color:var(--ink-soft)}
 .gd-ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.6}
-.gd-ul a{color:var(--navy-700);text-decoration:underline;word-break:break-all}
+.gd-ul a{color:var(--navy-700);text-decoration:underline;overflow-wrap:anywhere}
 .gd-ul a:hover{color:var(--amber)}
 .gd-doc{display:flex;gap:8px;align-items:baseline;font-size:13.5px;padding:4px 0;border-bottom:1px dotted var(--line)}
 .gd-doc:last-child{border-bottom:0}
@@ -5338,7 +5338,8 @@ function renderGuide(){
   if (!root) return;
   const G = GUIDE_DATA, esc = escapeHtml;
   /* ทำ URL ในข้อความ (ที่ escape แล้ว) ให้คลิกเปิดแท็บใหม่ได้ */
-  const linkify = h => h.replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+  /* คำว่า "ที่ <URL>" ขึ้นบรรทัดใหม่ เพื่อให้ลิงก์ไม่ถูกหักกลางคำ */
+  const linkify = h => h.replace(/\s+(ที่\s+https?:\/\/)/g, '<br>$1').replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
   /* ข้อย่อยแบบมีเลข (1.1 ...) เป็นชิป — ชิปที่อยู่ในกลุ่ม "ต้องรายงานทันที" ไฮไลต์สีส้ม; ข้อความที่ไม่มีเลขเป็นหมายเหตุ */
   const stepHtml = (s, i) => {
     const subs = s.subs || [];
