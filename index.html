@@ -5092,7 +5092,7 @@ function openCaseDetailModal(id){
           <div class="cd-cells">
             <div class="cd-cell"><span class="cd-k">ทางหลวงหมายเลข</span><span class="cd-v">ทล.${escapeHtml(rec.highway)}</span></div>
             <div class="cd-cell cd-grow"><span class="cd-k">ตอน</span><span class="cd-v">${escapeHtml(rec.section)}</span></div>
-            <div class="cd-cell"><span class="cd-k">กิโลเมตร</span><span class="cd-v">กม.${escapeHtml(formatKm(rec.km))}</span></div>
+            <div class="cd-cell"><span class="cd-k">กิโลเมตร</span><span class="cd-v">กม.${escapeHtml(formatKm(rec.km))}</span></div>${rec.side ? '<div class="cd-cell"><span class="cd-k">ด้าน</span><span class="cd-v">' + escapeHtml(rec.side) + '</span></div>' : ''}
           </div>
         </div>
         <div class="modal-body">
@@ -5102,7 +5102,7 @@ function openCaseDetailModal(id){
               <div class="cd-card"><div class="cd-sec">ข้อมูลอุบัติเหตุ</div>
                 <dl class="cd-dl">
                   <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDate(rec.dateIncident) + (rec.time ? ' · ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
-                  <dt>ตำแหน่ง</dt><dd>${cdVal(formatPosition(rec))}</dd>
+                  <dt>ตำแหน่ง</dt><dd>${cdVal(rec.location)}</dd>
                   <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
                   <dt>พื้นที่</dt><dd>${cdVal(zoneAreaText(rec))}</dd>                </dl></div>
               <div class="cd-card"><div class="cd-sec">${others.length ? 'ผู้ละเมิดหลัก' : 'ผู้ละเมิด'}</div>
