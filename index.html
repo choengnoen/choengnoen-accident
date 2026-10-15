@@ -2045,6 +2045,14 @@ function formatThaiDate(dateStr){
   const yearBE = String(d.getFullYear() + 543).slice(-2);
   return `${day} ${month} ${yearBE}`;
 }
+// วันที่แบบเต็มไม่ย่อ (ใช้ในหน้าต่างรายละเอียดและรูปคัดลอก) เช่น 11 สิงหาคม 2569
+const THAI_MONTHS_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+function formatThaiDateFull(dateStr){
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return escapeHtml(dateStr);
+  return `${d.getDate()} ${THAI_MONTHS_FULL[d.getMonth()]} ${d.getFullYear() + 543}`;
+}
 function escapeHtml(s){
   if (s === null || s === undefined) return '';
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -4908,7 +4916,7 @@ async function buildCaseImage(){
   body.appendChild(mk('snap-col', [tiles, grid]));
   const stamp = document.createElement('div');
   stamp.className = 'snap-stamp';
-  stamp.textContent = 'ระบบงานอุบัติเหตุ · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + (() => { const n = new Date(), z = x => String(x).padStart(2, '0'); return formatThaiDate(n.getFullYear() + '-' + z(n.getMonth() + 1) + '-' + z(n.getDate())) + ' ' + z(n.getHours()) + ':' + z(n.getMinutes()); })() + ' น.';
+  stamp.textContent = 'ระบบงานอุบัติเหตุ · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + (() => { const n = new Date(), z = x => String(x).padStart(2, '0'); return formatThaiDateFull(n.getFullYear() + '-' + z(n.getMonth() + 1) + '-' + z(n.getDate())) + ' เวลา ' + z(n.getHours()) + ':' + z(n.getMinutes()); })() + ' น.';
   shell.append(hd, body, stamp);
 
   const stage = document.createElement('div');
@@ -5028,13 +5036,13 @@ function openCaseDetailModal(id){
   const wd = window.DRAFTS && DRAFTS.addWorkdays && DRAFTS.workLeft ? DRAFTS : null;
   let docCls = 'n', docSub = incStr ? 'ยังไม่ระบุวันส่ง' : 'ยังไม่ระบุวันเกิดเหตุ', docNote = '';
   if (sentStr) {
-    docCls = 'ok'; docSub = escapeHtml(formatThaiDate(sentStr));
+    docCls = 'ok'; docSub = escapeHtml(formatThaiDateFull(sentStr));
     if (wd && incStr) { const late = -wd.workLeft(sentStr, wd.addWorkdays(incStr, 10)); if (late > 0) docNote = 'ส่งช้า ' + late + ' วันทำการ'; }
   } else if (isClosed) {
     docSub = 'ไม่ได้บันทึกวันส่ง';
   } else if (wd && incStr) {
     const due = wd.addWorkdays(incStr, 10), left = wd.workLeft(todayStr, due);
-    docNote = 'กำหนด ' + escapeHtml(formatThaiDate(due));
+    docNote = 'กำหนด ' + escapeHtml(formatThaiDateFull(due));
     if (left < 0) { docCls = 'bad'; docSub = 'เลยกำหนด <span class="cd-nw">' + (-left) + ' วันทำการ</span>'; }
     else if (left === 0) { docCls = 'bad'; docSub = due < todayStr ? 'เลยกำหนดแล้ว' : 'ครบกำหนดวันนี้'; }
     else { docCls = 'warn'; docSub = 'เหลือ <span class="cd-nw">' + left + ' วันทำการ</span>'; }
@@ -5042,12 +5050,12 @@ function openCaseDetailModal(id){
   const hasPolice = !!String(rec.policeReportNo || '').trim();
   const tilesHtml = `<div class="cd-prog">
       <ol class="cd-steps">
-        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? escapeHtml(formatThaiDate(incStr)) : 'ยังไม่ระบุ')}
+        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? escapeHtml(formatThaiDateFull(incStr)) : 'ยังไม่ระบุ')}
         ${step(hasPolice ? 'ok' : 'n', 'แจ้งความ', hasPolice ? 'แล้ว' : 'ยังไม่ระบุ')}
         ${step(docCls, 'ส่งเอกสารถึงแขวง', docSub, docNote)}
         ${step(doneCls(rec.compensationStatus, 'ชดใช้แล้ว'), 'การชดใช้', escapeHtml(rec.compensationStatus || 'ยังไม่ระบุ'))}
         ${step(doneCls(rec.repairStatus, 'จัดซ่อมแล้ว'), 'การจัดซ่อม', escapeHtml(rec.repairStatus || 'ยังไม่ระบุ'))}
-        ${step(isClosed ? 'ok' : 'warn', 'ยุติเรื่อง', isClosed ? escapeHtml(formatThaiDate(rec.closedDate)) : 'ยังไม่ยุติ')}
+        ${step(isClosed ? 'ok' : 'warn', 'ยุติเรื่อง', isClosed ? escapeHtml(formatThaiDateFull(rec.closedDate)) : 'ยังไม่ยุติ')}
       </ol>
       <div class="cd-age"><span>${isClosed ? 'ใช้เวลาจนยุติ' : 'ระยะเวลาค้าง'}</span><b>${days === null ? '-' : days.toLocaleString('th-TH') + ' วัน'}</b></div>
     </div>`;
@@ -5102,7 +5110,7 @@ function openCaseDetailModal(id){
             <div>
               <div class="cd-card"><div class="cd-sec">ข้อมูลอุบัติเหตุ</div>
                 <dl class="cd-dl">
-                  <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDate(rec.dateIncident) + (rec.time ? ' · ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
+                  <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDateFull(rec.dateIncident) + (rec.time ? ' เวลา ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
                   <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
                   <dt>พื้นที่</dt><dd>${cdVal(zoneAreaText(rec))}</dd>                </dl></div>
               <div class="cd-card"><div class="cd-sec">${others.length ? 'ผู้ละเมิดหลัก' : 'ผู้ละเมิด'}</div>
