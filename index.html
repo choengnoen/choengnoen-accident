@@ -3541,7 +3541,7 @@ function updateZoneFields(fromRemote){
   }
 }
 function zoneAreaText(r){
-  return [r.tambon ? 'ต.' + r.tambon : '', r.amphoe ? 'อ.' + r.amphoe : '', r.changwat ? 'จ.' + r.changwat : ''].filter(Boolean).join(' ');
+  return [r.moo ? 'ม.' + String(r.moo).replace(/^\s*(?:หมู่ที่|หมู่|ม\.)\s*/, '') : '', r.tambon ? 'ต.' + r.tambon : '', r.amphoe ? 'อ.' + r.amphoe : '', r.changwat ? 'จ.' + r.changwat : ''].filter(Boolean).join(' ');
 }
 
 /* ============ form: save / edit / clear ============ */
@@ -5085,9 +5085,7 @@ function openCaseDetailModal(id){
                   <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDate(rec.dateIncident) + (rec.time ? ' · ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
                   <dt>ตำแหน่ง</dt><dd>${cdVal(formatPosition(rec))}</dd>
                   <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
-                  <dt>พื้นที่</dt><dd>${cdVal(zoneAreaText(rec))}</dd>
-                  ${rec.moo ? `<dt>หมู่ที่</dt><dd>${escapeHtml(rec.moo)}</dd>` : ''}
-                </dl></div>
+                  <dt>พื้นที่</dt><dd>${cdVal(zoneAreaText(rec))}</dd>                </dl></div>
               <div class="cd-card"><div class="cd-sec">${others.length ? 'ผู้ละเมิดหลัก' : 'ผู้ละเมิด'}</div>
                 ${caseDetailPersonHtml(mainParty, '', insuranceRows)}
                 ${others.map((p, i) => `<div class="cd-divider"></div>${caseDetailPersonHtml(p, 'คู่กรณีร่วมที่ ' + (i + 2))}`).join('')}
