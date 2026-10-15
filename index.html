@@ -1147,6 +1147,15 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .snap .cd-prog{padding:8px 12px;margin-bottom:0;gap:10px}
 .snap .cd-st b{font-size:13px}.snap .cd-ss{font-size:12px}
 .snap .cd-dl.wide dd.full{grid-column:2 / -1}
+.snap .snap-grid{align-items:start}
+.snap .cd-card{flex-shrink:0;overflow:visible}
+.snap .snap-itemscard .cd-item{align-items:flex-start;padding:6px 0;line-height:1.6}
+.snap .snap-itemscard .cd-item > div{flex:1;min-width:0}
+.snap .snap-itemscard .cd-item b{font-size:14px;line-height:1.6}
+.snap .snap-itemscard .cd-q{font-size:12px;line-height:1.5}
+.snap .cd-dl.snap-dl{display:grid;grid-template-columns:132px 1fr;gap:5px 10px;font-size:13.5px;line-height:1.5}
+.snap .cd-dl.snap-dl dt{white-space:normal}
+.snap .cd-dl.snap-dl dd{font-size:13.5px !important}
 .snap .cd-divider{margin:8px 0}
 .snap .cd-photos{gap:8px}
 .snap .cd-photo{aspect-ratio:4/3}
@@ -4884,30 +4893,32 @@ async function buildCaseImage(){
   const known = new Set([cInfo, cPerson, cRef, cPhoto, cItems]);
   const extra = cards.filter(c => !known.has(c));   // การ์ดอื่นที่อาจเพิ่มในอนาคต → ต่อท้ายคอลัมน์ซ้าย
 
-  // การ์ดรวม "ข้อมูลอุบัติเหตุและอ้างอิง"
-  let merged = null;
-  const mDls = [cInfo, cRef].filter(Boolean).flatMap(c => [...c.querySelectorAll('.cd-dl')]);
-  if (mDls.length) {
-    merged = mk('cd-card', []);
-    const t = document.createElement('div'); t.className = 'cd-sec'; t.textContent = 'ข้อมูลอุบัติเหตุและอ้างอิง';
-    merged.appendChild(t); merged.appendChild(snapPairify(mDls));
-  }
-  if (cPerson) [...cPerson.querySelectorAll('.cd-dl')].forEach(dl => dl.replaceWith(snapPairify([dl])));
-  // รายการทรัพย์สิน 2 คอลัมน์
-  if (cItems && cItems.querySelectorAll('.cd-item').length >= 4) {   // รายการน้อย (1–3 รายการ) แสดงคอลัมน์เดียวตามเดิม
-    const items = [...cItems.querySelectorAll('.cd-item')];
-    const receipt = cItems.querySelector('.cd-receipt');
-    const sec = cItems.querySelector('.cd-sec');
-    const half = Math.ceil(items.length / 2);
-    const cells = []; for (let i = 0; i < half; i++) cells.push(items[i], items[half + i] || mk('', []));   // เรียงสลับซ้าย-ขวาเป็นแถว ให้บรรทัดสองคอลัมน์ตรงกัน
-    const list = mk('snap-items2', cells);
-    cItems.innerHTML = '';
-    if (sec) cItems.appendChild(sec);
-    cItems.appendChild(list);
-    if (receipt) cItems.appendChild(receipt);
-  }
-  const grid = mk('snap-grid', [mk('snap-col', [cPhoto, merged, cPerson, ...extra]), mk('snap-col', [cItems])]);
-  grid.style.gridTemplateColumns = '1fr 1.25fr';
+  // "สภ.X" → ชื่อเต็ม "สถานีตำรวจภูธรX" (เฉพาะในรูปที่คัดลอก) · "สภ.เมือง" ต่อชื่อจังหวัดจากแถว "พื้นที่" เป็น "เมืองระยอง" · ถ้าต่อจังหวัดไม่ได้ คงตัวย่อไว้ ไม่เดาชื่อ
+  (() => {
+    const dts = [...clone.querySelectorAll('.cd-dl dt')];
+    const dtOf = label => dts.find(dt => dt.textContent.trim() === label);
+    const stDt = dtOf('สภ.'), areaDt = dtOf('พื้นที่');
+    const stDd = stDt && stDt.nextElementSibling;
+    if (!stDd || stDd.querySelector('.cd-na')) return;
+    const m = /^สภ\.\s*(.+)$/.exec(stDd.textContent.trim());
+    if (!m) return;
+    let name = m[1].trim();
+    if (name === 'เมือง') {
+      const pm = areaDt && areaDt.nextElementSibling ? /จ\.\s*(\S+)/.exec(areaDt.nextElementSibling.textContent) : null;
+      if (!pm) return;
+      name += pm[1];
+    }
+    stDd.textContent = 'สถานีตำรวจภูธร' + name;
+  })();
+
+  // การ์ดข้อมูล: หัวข้อ–ค่า แถวละ 1 รายการ เรียงตามลำดับเนื้อหา (ไม่จับคู่ข้ามหัวข้อ ไม่รวมการ์ด)
+  [cInfo, cPerson, cRef, ...extra].filter(Boolean).forEach(card => card.querySelectorAll('.cd-dl').forEach(dl => dl.classList.add('snap-dl')));
+  // ไม่มีรูปถ่ายในเคสนี้ → ไม่แสดงหัวข้อ "รูปถ่าย" ในรูปที่คัดลอก
+  const photoCard = cPhoto && cPhoto.querySelector('.cd-photo') ? cPhoto : null;
+  if (cItems) cItems.classList.add('snap-itemscard');
+  // ซ้าย = ข้อมูลเรื่อง (ข้อมูลอุบัติเหตุ → ผู้ละเมิด → อ้างอิงและหมายเหตุ) · ขวา = รูปถ่าย แล้วต่อด้วยรายการทรัพย์สิน + ยอดรวม
+  const grid = mk('snap-grid', [mk('snap-col', [cInfo, cPerson, cRef, ...extra]), mk('snap-col', [photoCard, cItems])]);
+  grid.style.gridTemplateColumns = '1fr 1fr';
 
   const shell = document.createElement('div');
   shell.className = 'modal case-modal snap';
@@ -4930,6 +4941,18 @@ async function buildCaseImage(){
   }
   try {
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    // ชื่อวัสดุ: ตัดบรรทัดเฉพาะชื่อที่ยาวจนล้นบรรทัดเดียว (วัดจากหน้าจริง) และตัดตรงก่อนส่วนขนาด/สเปก
+    //   (หนา · ยาว · กว้าง · สูง · ขนาด · Dia · 16x30) → บรรทัดแรก = ชื่อ, บรรทัดสอง = ขนาด · ชื่อที่พอดีบรรทัดเดียวไม่แตะ
+    if (cItems) {
+      const SZ = /\s+(?=(?:หนา|ยาว|กว้าง|สูง)\s*\d|ขนาด|Dia|เส้นผ่าน|\d+(?:\.\d+)?\s*[xX×]\s*\d)/;
+      cItems.querySelectorAll('.cd-item > div > b').forEach(b => {
+        if (b.getClientRects().length <= 1) return;
+        const txt = b.textContent.trim(), m = SZ.exec(txt);
+        if (!m || m.index === 0) return;
+        b.textContent = '';
+        b.append(txt.slice(0, m.index), document.createElement('br'), txt.slice(m.index + m[0].length));
+      });
+    }
     const canvas = await window.html2canvas(shell, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false, windowWidth: 1100 });
     return await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('สร้างรูปไม่สำเร็จ')), 'image/png'));
   } finally { stage.remove(); }
