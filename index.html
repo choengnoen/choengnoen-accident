@@ -19,6 +19,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600;700&family=Sarabun:wght@400;500;600;700&display=swap');
 
 :root{
+  --field-h:42px;   /* ความสูงกล่องกรอกทุกชนิด — แก้ที่เดียว */
   --ink:#182430;
   --ink-2:#071b30;
   --ink-soft:#4d5a66;
@@ -133,7 +134,7 @@ h1,h2,h3,.display{font-family:'Kanit',sans-serif;font-weight:700}
 
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
 /* แท็บเล็ต (iPad/Safari): ช่องวันที่/เวลาแบบเนทีฟหดตามเนื้อหา ต้องบังคับให้ยืดเต็มช่องเหมือนช่องอื่น */
-.field input[type=date],.field input[type=time]{width:100%;min-width:0;box-sizing:border-box;display:block;-webkit-appearance:none;appearance:none;min-height:38px;text-align:left}
+.field input[type=date],.field input[type=time]{width:100%;min-width:0;box-sizing:border-box;display:block;-webkit-appearance:none;appearance:none;min-height:var(--field-h);text-align:left}
 .field input[type=date]::-webkit-date-and-time-value,.field input[type=time]::-webkit-date-and-time-value{text-align:left}
 .field label{font-size:12.5px;color:var(--ink-soft);font-weight:600}
 .field label .req{color:var(--rust)}
@@ -841,6 +842,19 @@ tr.asset-frequent:hover td{background:#fbe9c9 !important}
 .dsel-btn:hover:not(:disabled){border-color:#c9cec7}
 .dsel-btn:focus{outline:none;border-color:var(--amber-500);box-shadow:0 0 0 3px rgba(224,98,15,.14)}
 .dsel-btn:disabled{background:var(--paper);color:var(--ink-mute);cursor:not-allowed}
+/* 15 ต.ค.: กล่องกรอกทุกชนิด (ช่องพิมพ์ วันที่ ปุ่มเลือก) สูงเท่ากัน ตัวแปร --field-h (ค่าเดียวทั้งระบบ ตั้งที่ :root) */
+.field input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]),.field .dsel-btn{height:var(--field-h);box-sizing:border-box}
+.field .dsel-btn{padding-top:0;padding-bottom:0}
+/* 15 ต.ค.: แถวย่อย (รายการทรัพย์สิน สอบปากคำ ผู้รับมอบหมาย ค้นหา/ชุดวัสดุ ช่วง กม.) สูง ตัวแปร --field-h (ค่าเดียวทั้งระบบ ตั้งที่ :root) เท่าช่องหลัก */
+.item-row .it-name{min-height:var(--field-h);padding:9px 10px;box-sizing:border-box}
+.item-row .field .qty-step{height:var(--field-h);box-sizing:border-box;border-radius:8px}
+.item-row .field .qty-step input{height:100% !important;border:0 !important;border-radius:0;padding:0 2px}
+.item-row .del-item,.field .btn.del-item{height:var(--field-h);box-sizing:border-box}
+.assignee-row .field>div[style*="height:36px"]{height:var(--field-h) !important}
+.it-search input{height:var(--field-h);box-sizing:border-box}
+.dsel.it-preset .dsel-btn{height:var(--field-h);box-sizing:border-box;padding-top:0;padding-bottom:0}
+.it-toolbar .btn{height:var(--field-h)}
+.em-kadd input{height:var(--field-h);box-sizing:border-box}
 .dsel-stack{display:grid;min-width:0}
 .dsel-stack > span{grid-area:1/1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dsel-size{visibility:hidden;height:0}
