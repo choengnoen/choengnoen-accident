@@ -880,6 +880,12 @@ tr.asset-frequent:hover td{background:#fbe9c9 !important}
 .it-search input{height:var(--field-h);box-sizing:border-box}
 .dsel.it-preset .dsel-btn{height:var(--field-h);box-sizing:border-box;padding-top:0;padding-bottom:0}
 .it-toolbar .btn{height:var(--field-h)}
+/* แถวค้นหา/ดึงชุด/เพิ่มรายการ ใช้คอลัมน์เดียวกับตารางรายการ: ค้นหา=ชื่อ+จำนวน · ดึงชุด=หน่วย+ราคา · เพิ่มรายการ=เป็นเงิน+ปุ่มลบ */
+.it-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 118px 92px 104px 112px 34px;gap:8px;align-items:start}
+.it-toolbar .it-search{grid-column:span 2;min-width:0}
+.it-toolbar .it-preset,.dsel.it-preset{grid-column:span 2;width:100%;min-width:0}
+.it-toolbar #btnAddItem{grid-column:span 2;width:100%}
+@media(max-width:720px){.it-toolbar{grid-template-columns:1fr 1fr}.it-toolbar .it-search{grid-column:span 2}.it-toolbar .it-preset,.dsel.it-preset,.it-toolbar #btnAddItem{grid-column:span 1}}
 .em-kadd input{height:var(--field-h);box-sizing:border-box}
 .dsel-stack{display:grid;min-width:0}
 .dsel-stack > span{grid-area:1/1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1253,7 +1259,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
       <div class="section-title"><span class="num">1</span> ข้อมูลอุบัติเหตุ</div>
       <div class="fgrp">
       <div class="grid g12">
-        <div class="field c2">
+        <div class="field c4">
           <label>ปีงบประมาณ <span class="req">*</span></label>
           <select id="f_fiscalYear"></select>
         </div>
@@ -1269,7 +1275,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
       </div>
       <div class="fgrp">
       <div class="grid g12">
-        <div class="field c6">
+        <div class="field c4">
           <label>ทล. (สายทาง) <span class="req">*</span></label>
           <select id="f_highway"></select>
           <span class="hint km-hint" id="highwayHint"></span>
@@ -1281,7 +1287,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <input type="text" id="f_km">
           <span class="hint km-hint" id="kmHint"></span>
         </div>
-        <div class="field c4">
+        <div class="field c3">
           <label>ด้าน / ตำแหน่ง</label>
           <select id="f_side">
             <option value="">— เลือก —</option>
@@ -1295,7 +1301,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
             <option value="ขวาทาง ไหล่ทาง">ขวาทาง (ไหล่ทาง)</option>
           </select>
         </div>
-        <div class="field c12">
+        <div class="field c3">
           <label>บริเวณโดยสังเขป</label>
           <input type="text" id="f_location" placeholder="เช่น สี่แยก, จุดกลับรถ, สะพาน">
         </div>
