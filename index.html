@@ -131,6 +131,28 @@ h1,h2,h3,.display{font-family:'Kanit',sans-serif;font-weight:700}
 .grid-5{grid-template-columns:1fr 1fr 1fr 1fr 1fr}
 .grid-vehicle{grid-template-columns:1fr 1fr 0.65fr}
 @media(max-width:720px){.grid-2,.grid-3,.grid-4,.grid-5,.grid-vehicle{grid-template-columns:1fr}}
+/* ส่วน 1 แบ่งเป็นกลุ่ม เมื่อไหร่/ที่ไหน/เขตพื้นที่ — ความกว้างช่องตามความยาวข้อมูล (12 ส่วน) */
+.g12{grid-template-columns:repeat(12,minmax(0,1fr))}
+.g12 .c2{grid-column:span 2}.g12 .c3{grid-column:span 3}.g12 .c4{grid-column:span 4}.g12 .c6{grid-column:span 6}.g12 .c12{grid-column:span 12}
+@media(max-width:720px){.g12{grid-template-columns:repeat(2,minmax(0,1fr))}.g12 .c2,.g12 .c3{grid-column:span 1}.g12 .c4,.g12 .c6,.g12 .c12{grid-column:span 2}}
+.fgrp{border:1px dashed var(--line);border-radius:12px;padding:10px 14px 14px;margin-top:12px}
+.fgrp:first-of-type{margin-top:0}
+.send-hero{display:flex;align-items:center;gap:14px;margin-top:12px;padding:12px 14px;border:1.5px solid #e8761a;background:#fff4e8;border-radius:12px}
+.send-hero .sh-ic{width:38px;height:38px;border-radius:50%;background:#e8761a;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.send-hero .sh-tx{flex:1;min-width:0}
+.send-hero .sh-tx b{display:block;font-size:14.5px;font-weight:600;color:#7a3a07}
+.send-hero .sh-tx span{font-size:12px;color:#9a5a1e}
+.send-hero .sh-chip{font-size:12px;padding:3px 10px;border-radius:99px;background:#fde7c8;color:#8a4a0a;white-space:nowrap;flex:none}
+.send-hero .sh-chip.done{background:#dcf3e4;color:#17713b}
+.send-hero input[type=date]{width:180px;flex:none;border-color:#e8761a}
+@media(max-width:720px){.send-hero{flex-wrap:wrap}.send-hero .sh-tx{flex:1 1 60%}.send-hero input[type=date]{width:100%}}
+.fgrp-t{font-size:12.5px;color:var(--ink-mute);margin:0 0 8px}
+.ad-show{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:0 12px;border:1px solid #bfe3cc;background:#eef8f1;border-radius:10px;font-size:14px;white-space:nowrap;overflow:hidden}
+.ad-show #adText{overflow:hidden;text-overflow:ellipsis}
+.ad-show #adText.ok::before{content:"✓ ";color:#1a8a4a}
+.ad-show #adText.empty{color:var(--ink-mute)}
+.ad-show a{color:#c2570c;font-size:13px;text-decoration:none;flex:none}
+.ad-edit{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
 /* แท็บเล็ต (iPad/Safari): ช่องวันที่/เวลาแบบเนทีฟหดตามเนื้อหา ต้องบังคับให้ยืดเต็มช่องเหมือนช่องอื่น */
@@ -1229,34 +1251,39 @@ tr.route-editable:hover td{background:var(--amber-glow)}
     <div class="form-main">
     <div class="card" id="fsec1">
       <div class="section-title"><span class="num">1</span> ข้อมูลอุบัติเหตุ</div>
-      <div class="grid grid-3">
-        <div class="field">
+      <div class="fgrp">
+      <div class="fgrp-t">เมื่อไหร่</div>
+      <div class="grid g12">
+        <div class="field c2">
           <label>ปีงบประมาณ <span class="req">*</span></label>
           <select id="f_fiscalYear"></select>
         </div>
-        <div class="field">
+        <div class="field c3">
           <label>วันที่เกิดเหตุ <span class="req">*</span></label>
           <input type="date" id="f_dateIncident">
         </div>
-        <div class="field">
+        <div class="field c2">
           <label>เวลา</label>
           <input type="time" id="f_time">
         </div>
       </div>
-      <div class="grid grid-4" style="margin-top:12px">
-        <div class="field">
+      </div>
+      <div class="fgrp">
+      <div class="fgrp-t">ที่ไหน</div>
+      <div class="grid g12">
+        <div class="field c6">
           <label>ทล. (สายทาง) <span class="req">*</span></label>
           <select id="f_highway"></select>
           <span class="hint km-hint" id="highwayHint"></span>
           <!-- ชื่อตอนแสดงอยู่ในรายการเลือกทล.แล้ว จึงไม่แสดงเป็นช่องแยก — เก็บเป็นช่องซ่อน (ตั้งอัตโนมัติจากทล.) เพื่อให้ยังบันทึกตอนลงเคสเหมือนเดิม -->
           <input type="hidden" id="f_section">
         </div>
-        <div class="field">
+        <div class="field c2">
           <label>กม. ที่เกิดเหตุ <span class="req">*</span></label>
           <input type="text" id="f_km">
           <span class="hint km-hint" id="kmHint"></span>
         </div>
-        <div class="field">
+        <div class="field c4">
           <label>ด้าน / ตำแหน่ง</label>
           <select id="f_side">
             <option value="">— เลือก —</option>
@@ -1270,35 +1297,39 @@ tr.route-editable:hover td{background:var(--amber-glow)}
             <option value="ขวาทาง ไหล่ทาง">ขวาทาง (ไหล่ทาง)</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field c12">
           <label>บริเวณโดยสังเขป</label>
           <input type="text" id="f_location" placeholder="เช่น สี่แยก, จุดกลับรถ, สะพาน">
         </div>
       </div>
+      </div>
       <!-- แผน 9: เขตพื้นที่ (สภ./หมู่/ตำบล/อำเภอ/จังหวัด) เติมให้อัตโนมัติจากฐานข้อมูลกลางตาม ทล. + กม. + ด้าน — แก้ทับเองได้ -->
-      <div class="grid grid-5" style="margin-top:12px">
-        <div class="field">
+      <div class="fgrp">
+      <div class="fgrp-t">เขตพื้นที่ (เติมให้อัตโนมัติ)</div>
+      <div class="grid g12">
+        <div class="field c4">
           <label>สภ. รับผิดชอบ</label>
           <input type="text" id="f_policeStation" placeholder="เช่น สภ.บ้านค่าย">
         </div>
-        <div class="field">
+        <div class="field c2">
           <label>หมู่ที่เกิดเหตุ</label>
           <select id="f_moo"><option value="">— เลือกสายทาง/กม. ก่อน —</option></select>
         </div>
-        <div class="field">
+        <div class="field c3">
           <label>ตำบล</label>
           <input type="text" id="f_tambon">
         </div>
-        <div class="field">
-          <label>อำเภอ</label>
-          <input type="text" id="f_amphoe">
-        </div>
-        <div class="field">
-          <label>จังหวัด</label>
-          <input type="text" id="f_changwat" value="ระยอง">
+        <div class="field c3" id="adField">
+          <label>อำเภอ · จังหวัด</label>
+          <div class="ad-show" id="adShow"><span id="adText"></span><a href="#" id="adEdit" title="แก้อำเภอ/จังหวัด">แก้</a></div>
+          <div class="ad-edit" id="adEditBox" style="display:none">
+            <input type="text" id="f_amphoe" placeholder="อำเภอ">
+            <input type="text" id="f_changwat" value="ระยอง" placeholder="จังหวัด">
+          </div>
         </div>
       </div>
       <span class="hint km-hint" id="zoneHint"></span>
+      </div>
     </div>
 
     <div class="card" id="fsec2">
@@ -1411,6 +1442,8 @@ tr.route-editable:hover td{background:var(--amber-glow)}
             <option value="laborMachine">แยกค่าแรง + ค่าเครื่องจักร (เคสเก่า)</option>
           </select>
         </div>
+        <div>
+        <div class="it-lbl" aria-hidden="true" style="visibility:hidden">&nbsp;</div>
         <div class="it-receipt">
           <div class="ln"><span>รวมค่าวัสดุ</span><i></i><b id="itemsSumDisplay">0</b><span class="u">บาท</span></div>
           <div id="laborMachineRow" style="display:none">
@@ -1420,13 +1453,16 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <div class="ln" id="opCost30Row"><span>ค่าดำเนินการ (30% ของค่าวัสดุ)</span><i></i><b id="opCostDisplay">0</b><span class="u">บาท</span></div>
           <div class="ln grand"><b>รวมทั้งสิ้น</b><i></i><input type="text" id="f_totalPrice" readonly placeholder="0"><span class="u">บาท</span></div>
         </div>
+        </div>
       </div>
     </div>
 
     <div class="card" id="fsec4">
       <div class="section-title"><span class="num">4</span> ผลการติดตาม</div>
-      <div class="grid grid-3">
-        <div class="field">
+      <div class="fgrp">
+      <div class="fgrp-t">ความคืบหน้าเรื่อง</div>
+      <div class="grid g12">
+        <div class="field c4">
           <label>การชดใช้</label>
           <select id="f_compensationStatus">
             <option value="">— ยังไม่ระบุ —</option>
@@ -1434,7 +1470,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
             <option>ยังไม่ชดใช้</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field c4">
           <label>การจัดซ่อม</label>
           <select id="f_repairStatus">
             <option value="">— ยังไม่ระบุ —</option>
@@ -1442,27 +1478,35 @@ tr.route-editable:hover td{background:var(--amber-glow)}
             <option>ยังไม่จัดซ่อม</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field c4">
           <label>ยุติเรื่อง (วันที่)</label>
           <input type="date" id="f_closedDate">
         </div>
-        <div class="field">
+      </div>
+      </div>
+      <div class="fgrp">
+      <div class="fgrp-t">เอกสาร</div>
+      <div class="grid g12">
+        <div class="field c4">
           <label>เลขที่หนังสืออ้างอิง</label>
           <div class="ref-field" id="refField"><span class="ref-prefix" id="refPrefix">ที่ สทล.14 ขท.ระยอง.1/</span><input type="text" id="f_referenceNo"></div>
         </div>
-        <div class="field">
+        <div class="field c4">
           <label>เลขที่แจ้งความ</label>
           <input type="text" id="f_policeReportNo" placeholder="เช่น 123/2569 สภ.ระยอง">
         </div>
-        <div class="field">
+        <div class="field c4">
           <label>หมายเหตุ</label>
           <input type="text" id="f_note">
         </div>
+      </div>
       <!-- แผน 14: ติดตามนำส่งเอกสารถึงแขวงภายใน 10 วัน (นับจากวันเกิดเหตุ) — ระบบแจ้งเตือน LINE อ่านสองช่องนี้ -->
-        <div class="field">
-          <label>ส่งเอกสารถึงแขวงเมื่อ (วันที่)</label>
-          <input type="date" id="f_sentToDistrictDate">
-        </div>
+      <div class="send-hero">
+        <div class="sh-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></div>
+        <div class="sh-tx"><b>ส่งเอกสารถึงแขวงเมื่อ</b><span>วันที่เจ้าหน้าที่ส่งเรื่องให้แขวงดำเนินการต่อ</span></div>
+        <span class="sh-chip" id="sentChip">ยังไม่ส่ง</span>
+        <input type="date" id="f_sentToDistrictDate">
+      </div>
       </div>
     </div>
 
@@ -3527,6 +3571,39 @@ function findZone(hw, km, side){
 let zoneLastAuto = null; // ค่าที่ระบบเติมให้ล่าสุด — ถ้าเจ้าหน้าที่แก้เองแล้วจะไม่ถูกเขียนทับ
 let mooLastAuto = null;  // หมู่ที่ระบบเติมให้อัตโนมัติล่าสุด (มีตัวเลือกเดียว)
 function zoneFieldIds(){ return { station: 'f_policeStation', tambon: 'f_tambon', amphoe: 'f_amphoe', changwat: 'f_changwat' }; }
+/* ป้ายสถานะ "ยังไม่ส่ง / ส่งแล้ว" ของกรอบส่งเอกสารถึงแขวง */
+function syncSentChip(){
+  const v = document.getElementById('f_sentToDistrictDate').value;
+  const c = document.getElementById('sentChip');
+  c.textContent = v ? 'ส่งแล้ว' : 'ยังไม่ส่ง';
+  c.classList.toggle('done', !!v);
+}
+['input','change'].forEach(ev => document.getElementById('f_sentToDistrictDate').addEventListener(ev, syncSentChip));
+/* อำเภอ · จังหวัด: แสดงเป็นแถบอัตโนมัติ กด "แก้" เพื่อเปิดช่องพิมพ์ทับ (ช่อง f_amphoe/f_changwat ยังเป็นตัวเก็บค่าเดิม) */
+function syncAmphoeDisplay(){
+  const a = document.getElementById('f_amphoe').value.trim();
+  const c = document.getElementById('f_changwat').value.trim();
+  const t = document.getElementById('adText');
+  const txt = [a, c].filter(Boolean).join(' · ');
+  t.textContent = a ? txt : (c ? 'ยังไม่ระบุอำเภอ · ' + c : 'ยังไม่มีข้อมูล');
+  t.className = a ? 'ok' : 'empty';
+}
+function setAmphoeEdit(on){
+  document.getElementById('adShow').style.display = on ? 'none' : '';
+  document.getElementById('adEditBox').style.display = on ? '' : 'none';
+  if (on) document.getElementById('f_amphoe').focus(); else syncAmphoeDisplay();
+}
+(function(){
+  const ed = document.getElementById('adEdit');
+  if (!ed) return;
+  ed.addEventListener('click', e => { e.preventDefault(); setAmphoeEdit(true); });
+  ['f_amphoe','f_changwat'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', syncAmphoeDisplay);
+    el.addEventListener('blur', () => { setTimeout(() => { const ae = document.activeElement; if (ae !== document.getElementById('f_amphoe') && ae !== document.getElementById('f_changwat')) setAmphoeEdit(false); }, 120); });
+  });
+  syncAmphoeDisplay();
+})();
 function refreshMooOptions(zone, selected){
   const sel = document.getElementById('f_moo');
   const list = zone ? zone.moobans.slice() : [];
@@ -3560,6 +3637,7 @@ function updateZoneFields(fromRemote){
     hint.textContent = '';
     hint.classList.remove('warn');
     refreshMooOptions(zone, curMoo);
+    syncAmphoeDisplay();
   } else {
     if (!fromRemote && zoneLastAuto) {
       // ย้ายไปช่วง กม. ที่ไม่มีเขต: ล้างเฉพาะช่องที่ระบบเติมไว้เอง (ไม่แตะที่พิมพ์เอง)
@@ -3567,6 +3645,7 @@ function updateZoneFields(fromRemote){
     }
     zoneLastAuto = null;
     refreshMooOptions(null, curMoo);
+    syncAmphoeDisplay();
     if (hw && km !== null) {
       hint.innerHTML = ZONES.length
         ? 'ไม่พบเขตพื้นที่สำหรับ ทล.' + escapeHtml(hw) + ' กม.' + escapeHtml(formatKm(km)) + ' — กรอก สภ./ตำบล/อำเภอ เอง'
@@ -3881,6 +3960,7 @@ function clearForm(){
   document.getElementById('f_changwat').value = 'ระยอง'; // ทุกเคสอยู่ในจังหวัดระยอง — เติมไว้ก่อน (แก้เองได้)
   zoneLastAuto = null;
   mooLastAuto = null;
+  setAmphoeEdit(false);
   document.getElementById('f_vehicleType').value = '';
   document.getElementById('f_vehicleBrand').value = '';
   document.getElementById('f_plate').value = '';
@@ -3898,6 +3978,7 @@ function clearForm(){
   document.getElementById('f_policeReportNo').value = '';
   document.getElementById('f_note').value = '';
   document.getElementById('f_sentToDistrictDate').value = '';
+  syncSentChip();
   currentFallbackTotal = null;
   document.getElementById('f_costMethod').value = 'percent30';
   document.getElementById('f_laborCost').value = '';
@@ -3949,6 +4030,7 @@ function loadRecordIntoForm(rec){
   document.getElementById('f_changwat').value = rec.changwat || '';
   zoneLastAuto = null;
   mooLastAuto = null;
+  setAmphoeEdit(false);
   refreshMooOptions(findZone(rec.highway, rec.km, rec.side), rec.moo || '');
   document.getElementById('f_vehicleType').value = rec.vehicleType || '';
   document.getElementById('f_vehicleBrand').value = rec.vehicleBrand || '';
@@ -3972,6 +4054,7 @@ function loadRecordIntoForm(rec){
   document.getElementById('f_policeReportNo').value = rec.policeReportNo || '';
   document.getElementById('f_note').value = rec.note || '';
   document.getElementById('f_sentToDistrictDate').value = /^\d{4}-\d{2}-\d{2}$/.test(rec.sentToDistrictDate || '') ? rec.sentToDistrictDate : '';
+  syncSentChip();
   currentFallbackTotal = rec.totalPrice || null;
   document.getElementById('f_costMethod').value = rec.costMethod === 'laborMachine' ? 'laborMachine' : 'percent30';
   document.getElementById('f_laborCost').value = rec.laborCost != null ? formatThousands(String(rec.laborCost)) : '';
