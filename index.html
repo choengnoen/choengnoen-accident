@@ -814,7 +814,8 @@ tr.asset-frequent:hover td{background:#fbe9c9 !important}
 /* แถบเมนู: ปุ่มส่งออก Excel/PDF อยู่ขวาสุด แสดงเฉพาะหน้า "รายการอุบัติเหตุ" */
 .tabs-row{position:relative;max-width:1180px;margin:14px auto 0}
 .tabs-row .tabs{margin:0;max-width:none}
-.header-export{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;gap:8px;align-items:center}
+/* z-index: transform สร้างชั้นซ้อนใหม่ ต้องยกทั้งกล่องขึ้น ไม่งั้นเมนูส่งออกโดนปุ่มตัวกรองในหน้ารายการทับ */
+.header-export{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;gap:8px;align-items:center;z-index:10}
 .hx-btn{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;border-radius:8px;padding:4px 12px;font-family:'Sarabun',sans-serif;font-size:12.5px;cursor:pointer}
 .hx-btn:hover{background:rgba(255,255,255,.2)}
 @media(max-width:900px){.header-export{position:static;transform:none;justify-content:flex-end;padding:8px 0 2px}}
@@ -5731,7 +5732,7 @@ function findMaterialPriceMatch(itemName){
 
 /* ============ ส่งออก Excel / PDF (เจ้าหน้าที่ทุกคนใช้ได้ — ปุ่มอยู่หน้ารายการอุบัติเหตุ) ============
    - ตัวกรองหน้ารายการ (recordMatchesList) ใช้ร่วมกันทั้งตารางและการส่งออก เพื่อให้ "สิ่งที่เห็น = สิ่งที่ได้"
-   - Excel สร้างด้วย ExcelJS (โหลดตอนกดส่งออกครั้งแรก): 3 ชีต สรุปภาพรวม / รายการอุบัติเหตุ / รายการทรัพย์สิน
+   - Excel สร้างด้วย ExcelJS (โหลดตอนกดส่งออกครั้งแรก): 2 ชีต สรุปภาพรวม / รายการอุบัติเหตุ (รวมรายการทรัพย์สินของแต่ละเคสไว้ในชีตเดียว)
    - PDF = หน้ารายงานที่จัดหน้า A4 แนวนอน แล้วเปิดหน้าต่างพิมพ์ ให้เลือก "บันทึกเป็น PDF" (ฟอนต์ไทยชัวร์ ไม่ต้องใช้ไลบรารีเพิ่ม) */
 const EXCELJS_URL = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
 const EXCELJS_SRI = 'sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz';
@@ -5849,6 +5850,25 @@ function caseMoney(r){
   const total = r.totalPrice != null ? r.totalPrice : materials + operation;
   return { materials, operation, total };
 }
+// ราคาต่อหน่วย/เป็นเงินของทรัพย์สิน 1 รายการ (ใช้ร่วมกันทั้ง Excel และ PDF):
+// ใช้ราคาที่บันทึกในเคสก่อน ถ้าไม่มีจึงเทียบราคาประเมินล่าสุด
+function itemPriceInfo(item){
+  const qtyNum = Number(String(item.qty).replace(/,/g, ''));
+  const hasQty = item.qty !== '' && item.qty !== null && item.qty !== undefined && isFinite(qtyNum);
+  let unitPrice = item.unitPrice != null ? item.unitPrice : null;
+  let lineTotal = item.price != null ? item.price : null;
+  let source = '';
+  if (unitPrice != null || lineTotal != null) {
+    source = 'ตามที่บันทึกในเคส';
+    if (unitPrice == null && hasQty && qtyNum) unitPrice = lineTotal / qtyNum;
+    if (lineTotal == null && hasQty) lineTotal = qtyNum * unitPrice;
+  } else {
+    const match = findMaterialPriceMatch(item.name);
+    if (match) { unitPrice = match.price; if (hasQty) lineTotal = qtyNum * unitPrice; source = 'ราคาประเมินล่าสุด: ' + match.matchedName; }
+    else source = 'ไม่พบราคา';
+  }
+  return { qtyNum, hasQty, unitPrice, lineTotal, source };
+}
 function plateText(r){
   return (r.vehicleType === 'รถพ่วง' && r.trailerPlate) ? `หัว ${r.plate || '-'} / หาง ${r.trailerPlate}` : (r.plate || '');
 }
@@ -5886,7 +5906,7 @@ function summarizeRows(rows){
 const XL = {
   font: 'Sarabun',
   navy: 'FF123A5E', navyText: 'FFFFFFFF', line: 'FFDFE2DD', zebra: 'FFF7F8F6',
-  groupFill: ['FFDCE6F0', 'FFE8EEDD', 'FFF6E7D3', 'FFFCEBDA', 'FFE2E0F0', 'FFE6E6E0'],
+  groupFill: ['FFDCE6F0', 'FFE8EEDD', 'FFF6E7D3', 'FFE3EFE9', 'FFFCEBDA', 'FFE2E0F0', 'FFE6E6E0'],
   dateFmt: '[$-107041E]dd/mm/yyyy',   // แสดงปี พ.ศ. ใน Excel ภาษาไทย
   moneyFmt: '#,##0.00'
 };
@@ -5975,9 +5995,11 @@ function buildSummarySheet(wb, rows, meta){
   ws.pageSetup = { orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
 }
 
+// ชีต "รายการอุบัติเหตุ": 1 เคสอาจกินหลายแถว (1 แถวต่อทรัพย์สิน 1 รายการ) — ข้อมูลเคสรวมเซลล์ลงมาตามจำนวนรายการ
 function buildCasesSheet(wb, rows, seqMap){
   const ws = wb.addWorksheet('รายการอุบัติเหตุ');
-  // [หัวคอลัมน์, กลุ่ม, ความกว้าง, ชนิด, ตัวดึงค่า]
+  // [หัวคอลัมน์, กลุ่ม, ความกว้าง, ชนิด, ตัวดึงค่า, เป็นคอลัมน์ทรัพย์สิน]
+  // คอลัมน์ทรัพย์สิน: ตัวดึงค่ารับ (item, ราคาจาก itemPriceInfo) — คอลัมน์อื่นรับเคส
   const C = [
     ['เลขที่เคส', 0, 11, 'text', r => (r.fiscalYear || '') + '-' + (seqMap[r.id] || '')],
     ['ปีงบ', 0, 7, 'year', r => Number(r.fiscalYear) || null],
@@ -6002,22 +6024,29 @@ function buildCasesSheet(wb, rows, seqMap){
     ['คู่กรณีร่วม', 1, 34, 'text', r => otherPartiesText(r)],
     ['มีประกันภัย', 2, 11, 'text', r => r.hasInsurance || ''],
     ['บริษัทประกัน', 2, 20, 'text', r => r.insuranceCompany || ''],
-    ['จำนวนรายการ', 3, 10, 'int', r => (r.items || []).length],
-    ['ค่าวัสดุ', 3, 14, 'money', r => caseMoney(r).materials],
-    ['ค่าดำเนินการ', 3, 14, 'money', r => caseMoney(r).operation],
-    ['ราคาประเมินรวม', 3, 16, 'money', r => caseMoney(r).total],
-    ['การชดใช้', 4, 13, 'comp', r => r.compensationStatus || ''],
-    ['การจัดซ่อม', 4, 13, 'repair', r => r.repairStatus || ''],
-    ['วันที่ยุติเรื่อง', 4, 14, 'date', r => xlDate(r.closedDate)],
-    ['เลขที่หนังสืออ้างอิง', 5, 28, 'text', r => r.referenceNo || ''],
-    ['เลขที่แจ้งความ', 5, 20, 'text', r => r.policeReportNo || ''],
-    ['หมายเหตุ', 5, 30, 'text', r => r.note || ''],
-    ['ผู้บันทึก', 5, 20, 'text', r => r.recordedBy || '']
+    ['ที่', 3, 5, 'int', (it, p, k) => k + 1, true],
+    ['รายการทรัพย์สิน', 3, 42, 'text', it => it.name || '', true],
+    ['จำนวน', 3, 9, 'qty', (it, p) => p.hasQty ? p.qtyNum : (it.qty || null), true],
+    ['หน่วย', 3, 9, 'text', it => it.unit || '', true],
+    ['ราคา/หน่วย', 3, 14, 'money', (it, p) => p.unitPrice, true],
+    ['เป็นเงิน', 3, 14, 'money', (it, p) => p.lineTotal, true],
+    ['ที่มาของราคา', 3, 28, 'source', (it, p) => p.source, true],
+    ['ค่าวัสดุ', 4, 14, 'money', r => caseMoney(r).materials],
+    ['ค่าดำเนินการ', 4, 14, 'money', r => caseMoney(r).operation],
+    ['ราคาประเมินรวม', 4, 16, 'money', r => caseMoney(r).total],
+    ['การชดใช้', 5, 13, 'comp', r => r.compensationStatus || ''],
+    ['การจัดซ่อม', 5, 13, 'repair', r => r.repairStatus || ''],
+    ['วันที่ยุติเรื่อง', 5, 14, 'date', r => xlDate(r.closedDate)],
+    ['เลขที่หนังสืออ้างอิง', 6, 28, 'text', r => r.referenceNo || ''],
+    ['เลขที่แจ้งความ', 6, 20, 'text', r => r.policeReportNo || ''],
+    ['หมายเหตุ', 6, 30, 'text', r => r.note || ''],
+    ['ผู้บันทึก', 6, 20, 'text', r => r.recordedBy || '']
   ];
-  const GROUPS = ['เหตุการณ์', 'ผู้ละเมิดและรถ', 'ประกันภัย', 'ความเสียหาย (บาท)', 'สถานะ', 'อ้างอิง'];
+  const GROUPS = ['เหตุการณ์', 'ผู้ละเมิดและรถ', 'ประกันภัย', 'รายการทรัพย์สินเสียหาย (บาท)', 'ความเสียหายรวม (บาท)', 'สถานะ', 'อ้างอิง'];
+  const WRAP = new Set(['กม.', 'สภ.', 'คู่กรณีร่วม', 'หมายเหตุ', 'รายการทรัพย์สิน', 'ที่มาของราคา']);
+  const CENTER = new Set(['เลขที่เคส', 'ทล.', 'ตอน', 'ด้าน', 'หน่วย']);
   ws.columns = C.map(c => ({ width: c[2] }));
   // แถว 1 = หัวกลุ่ม (รวมเซลล์), แถว 2 = ชื่อคอลัมน์
-  let start = 0;
   for (let g = 0; g < GROUPS.length; g++) {
     const idxs = C.map((c, i) => c[1] === g ? i : -1).filter(i => i >= 0);
     const a = idxs[0] + 1, b = idxs[idxs.length - 1] + 1;
@@ -6038,28 +6067,56 @@ function buildCasesSheet(wb, rows, seqMap){
   });
   ws.getRow(1).height = 20; ws.getRow(2).height = 32;
 
+  const styleCell = (cell, c, v, zebra, extra) => {
+    cell.font = { name: XL.font, size: 10 };
+    cell.border = xlBorder();
+    cell.alignment = { vertical: 'top', wrapText: WRAP.has(c[0]), horizontal: CENTER.has(c[0]) ? 'center' : undefined };
+    if (zebra) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: XL.zebra } };
+    if (c[3] === 'date') { cell.numFmt = XL.dateFmt; cell.alignment = { horizontal: 'center', vertical: 'top' }; }
+    else if (c[3] === 'money') { cell.numFmt = XL.moneyFmt; cell.alignment = { horizontal: 'right', vertical: 'top' }; }
+    else if (c[3] === 'int') { cell.numFmt = '#,##0'; cell.alignment = { horizontal: 'center', vertical: 'top' }; }
+    else if (c[3] === 'qty') { cell.numFmt = 'General'; cell.alignment = { horizontal: 'center', vertical: 'top' }; }
+    else if (c[3] === 'year') { cell.numFmt = '0'; cell.alignment = { horizontal: 'center', vertical: 'top' }; }
+    if (c[3] === 'comp') xlStatusStyle(cell, v, 'ชดใช้แล้ว');
+    if (c[3] === 'repair') xlStatusStyle(cell, v, 'จัดซ่อมแล้ว');
+    if (c[3] === 'comp' || c[3] === 'repair') cell.alignment = { horizontal: 'center', vertical: 'top' };
+    if (c[3] === 'source' && v === 'ไม่พบราคา') cell.font = { name: XL.font, size: 10, color: { argb: 'FFA32D2D' } };
+    if (extra) Object.assign(cell, extra);
+  };
+
+  let rowNo = 3;
   rows.forEach((rec, ri) => {
-    const rowNo = ri + 3;
+    const items = rec.items || [];
+    const span = Math.max(1, items.length);
+    const zebra = !!(ri % 2);
+    for (let k = 0; k < span; k++) {
+      const item = items[k];
+      const p = item ? itemPriceInfo(item) : null;
+      C.forEach((c, i) => {
+        const cell = ws.getCell(rowNo + k, i + 1);
+        let v;
+        if (c[5]) v = item ? c[4](item, p, k) : null;
+        else v = k === 0 ? c[4](rec) : null;
+        cell.value = (v === null || v === undefined || v === '') ? null : v;
+        styleCell(cell, c, k === 0 || c[5] ? v : null, zebra);
+      });
+      if (!item) {
+        const cell = ws.getCell(rowNo, C.findIndex(c => c[0] === 'รายการทรัพย์สิน') + 1);
+        cell.value = '— ไม่มีรายการทรัพย์สิน —';
+        cell.font = { name: XL.font, size: 10, italic: true, color: { argb: 'FF8792A0' } };
+      }
+    }
+    // รวมเซลล์ข้อมูลเคสลงมาตามจำนวนรายการ
+    if (span > 1) C.forEach((c, i) => { if (!c[5]) ws.mergeCells(rowNo, i + 1, rowNo + span - 1, i + 1); });
+    // เส้นคั่นระหว่างเคสให้เห็นชัด
     C.forEach((c, i) => {
       const cell = ws.getCell(rowNo, i + 1);
-      const v = c[4](rec);
-      cell.value = (v === null || v === undefined || v === '') ? null : v;
-      cell.font = { name: XL.font, size: 10 };
-      cell.border = xlBorder();
-      cell.alignment = { vertical: 'top', wrapText: c[3] === 'text' && (i === 6 || i === 9 || i === 21 || i === 33) };
-      if (ri % 2) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: XL.zebra } };
-      if (c[3] === 'date') { cell.numFmt = XL.dateFmt; cell.alignment = { horizontal: 'center', vertical: 'top' }; }
-      else if (c[3] === 'money') { cell.numFmt = XL.moneyFmt; cell.alignment = { horizontal: 'right', vertical: 'top' }; }
-      else if (c[3] === 'int') { cell.numFmt = '#,##0'; cell.alignment = { horizontal: 'center', vertical: 'top' }; }
-      else if (c[3] === 'year') { cell.numFmt = '0'; cell.alignment = { horizontal: 'center', vertical: 'top' }; }
-      else if (i === 0 || i === 5 || i === 7 || i === 4) { cell.alignment = { horizontal: 'center', vertical: 'top' }; }
-      if (c[3] === 'comp') xlStatusStyle(cell, v, 'ชดใช้แล้ว');
-      if (c[3] === 'repair') xlStatusStyle(cell, v, 'จัดซ่อมแล้ว');
-      if (c[3] === 'comp' || c[3] === 'repair') cell.alignment = { horizontal: 'center', vertical: 'top' };
+      cell.border = Object.assign({}, cell.border, { top: { style: 'thin', color: { argb: 'FF9FB0C2' } } });
     });
+    rowNo += span;
   });
-  const last = rows.length + 2;
-  // แถวรวม — SUBTOTAL คำนวณเฉพาะแถวที่มองเห็นหลังกรองในชีตนี้
+  const last = rowNo - 1;
+  // แถวรวม — SUBTOTAL (เซลล์ที่รวมไว้ เก็บค่าแค่แถวแรกของเคส จึงไม่นับซ้ำ)
   const totRow = last + 1;
   const colOf = (title) => C.findIndex(c => c[0] === title) + 1;
   const L = (n) => ws.getColumn(n).letter;
@@ -6068,10 +6125,14 @@ function buildCasesSheet(wb, rows, seqMap){
     cell.value = { formula: `SUBTOTAL(${fn},${L(n)}3:${L(n)}${last})`, result: cachedFn() };
     cell.numFmt = fmt; cell.font = { name: XL.font, size: 10, bold: true };
   };
+  const nItems = rows.reduce((s, r) => s + (r.items || []).length, 0);
   ws.getCell(totRow, 1).value = { formula: `SUBTOTAL(103,A3:A${last})`, result: rows.length };
   ws.getCell(totRow, 1).numFmt = '"รวม "0" เคส"';
   ws.getCell(totRow, 1).font = { name: XL.font, size: 10, bold: true };
-  sumCell('จำนวนรายการ', 109, '#,##0', () => rows.reduce((s, r) => s + (r.items || []).length, 0));
+  const itemNameCol = colOf('รายการทรัพย์สิน');
+  ws.getCell(totRow, itemNameCol).value = `รวม ${nItems.toLocaleString('th-TH')} รายการ`;
+  ws.getCell(totRow, itemNameCol).font = { name: XL.font, size: 10, bold: true };
+  sumCell('เป็นเงิน', 109, XL.moneyFmt, () => rows.reduce((s, r) => s + (r.items || []).reduce((t, it) => t + (itemPriceInfo(it).lineTotal || 0), 0), 0));
   sumCell('ค่าวัสดุ', 109, XL.moneyFmt, () => rows.reduce((s, r) => s + (caseMoney(r).materials || 0), 0));
   sumCell('ค่าดำเนินการ', 109, XL.moneyFmt, () => rows.reduce((s, r) => s + (caseMoney(r).operation || 0), 0));
   sumCell('ราคาประเมินรวม', 109, XL.moneyFmt, () => rows.reduce((s, r) => s + (caseMoney(r).total || 0), 0));
@@ -6081,61 +6142,7 @@ function buildCasesSheet(wb, rows, seqMap){
     cell.border = { top: { style: 'medium', color: { argb: XL.navy } }, bottom: { style: 'thin', color: { argb: XL.line } } };
   }
   ws.views = [{ state: 'frozen', xSplit: 1, ySplit: 2, activeCell: 'B3' }];
-  ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: last, column: C.length } };
   ws.pageSetup = { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: '1:2' };
-}
-
-function buildItemsSheet(wb, rows, seqMap){
-  const ws = wb.addWorksheet('รายการทรัพย์สิน');
-  const H = [['เลขที่เคส', 11], ['วันที่เกิดเหตุ', 13], ['ทล.', 7], ['ตอน', 24], ['กม.', 10], ['รายการทรัพย์สินเสียหาย', 52], ['จำนวน', 9], ['หน่วย', 9], ['ราคา/หน่วย (บาท)', 16], ['เป็นเงิน (บาท)', 16], ['ที่มาของราคา', 34]];
-  ws.columns = H.map(h => ({ width: h[1] }));
-  H.forEach((h, i) => {
-    const cell = ws.getCell(1, i + 1);
-    cell.value = h[0];
-    cell.font = { name: XL.font, size: 10, bold: true, color: { argb: XL.navyText } };
-    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: XL.navy } };
-    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-    cell.border = xlBorder();
-  });
-  ws.getRow(1).height = 30;
-  let n = 1;
-  rows.forEach(r => {
-    (r.items || []).forEach(item => {
-      n++;
-      const qtyNum = Number(String(item.qty).replace(/,/g, ''));
-      const hasQty = item.qty !== '' && item.qty !== null && item.qty !== undefined && isFinite(qtyNum);
-      let unitPrice = item.unitPrice != null ? item.unitPrice : null;
-      let lineTotal = item.price != null ? item.price : null;
-      let source = '';
-      if (unitPrice != null || lineTotal != null) {
-        source = 'ตามที่บันทึกในเคส';
-        if (unitPrice == null && hasQty && qtyNum) unitPrice = lineTotal / qtyNum;
-        if (lineTotal == null && hasQty) lineTotal = qtyNum * unitPrice;
-      } else {
-        const match = findMaterialPriceMatch(item.name);
-        if (match) { unitPrice = match.price; if (hasQty) lineTotal = qtyNum * unitPrice; source = 'ราคาประเมินล่าสุด: ' + match.matchedName; }
-        else source = 'ไม่พบราคา';
-      }
-      const vals = [(r.fiscalYear || '') + '-' + (seqMap[r.id] || ''), xlDate(r.dateIncident), String(r.highway || ''), r.section || '', formatKm(r.km),
-        item.name || '', hasQty ? qtyNum : (item.qty || null), item.unit || '', unitPrice, lineTotal, source];
-      vals.forEach((v, i) => {
-        const cell = ws.getCell(n, i + 1);
-        cell.value = (v === '' || v === undefined) ? null : v;
-        cell.font = { name: XL.font, size: 10, color: (i === 10 && source === 'ไม่พบราคา') ? { argb: 'FFA32D2D' } : undefined };
-        cell.border = xlBorder();
-        cell.alignment = { vertical: 'top', wrapText: i === 5 || i === 10, horizontal: (i === 0 || i === 2 || i === 4 || i === 7) ? 'center' : (i === 6 ? 'center' : undefined) };
-        if (i === 1) { cell.numFmt = XL.dateFmt; cell.alignment = { horizontal: 'center', vertical: 'top' }; }
-        if (i === 8 || i === 9) { cell.numFmt = XL.moneyFmt; cell.alignment = { horizontal: 'right', vertical: 'top' }; }
-        if (i === 6 && typeof v === 'number') cell.numFmt = 'General';
-        if (i === 10) cell.alignment = { vertical: 'top', wrapText: true, indent: 1 };
-        if ((n % 2) === 0) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: XL.zebra } };
-      });
-    });
-  });
-  if (n === 1) { ws.getCell(2, 1).value = 'ไม่มีรายการทรัพย์สินในเคสที่เลือก'; ws.getCell(2, 1).font = { name: XL.font, size: 10, italic: true, color: { argb: 'FF8792A0' } }; n = 2; }
-  ws.views = [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'B2' }];
-  ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: n, column: H.length } };
-  ws.pageSetup = { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: '1:1' };
 }
 
 async function exportExcel(rows, meta){
@@ -6151,7 +6158,6 @@ async function exportExcel(rows, meta){
   wb.created = new Date();
   buildSummarySheet(wb, sorted, meta);
   buildCasesSheet(wb, sorted, seqMap);
-  buildItemsSheet(wb, sorted, seqMap);
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const url = URL.createObjectURL(blob);
@@ -6159,7 +6165,7 @@ async function exportExcel(rows, meta){
   a.href = url; a.download = exportFileBase(sorted, meta) + '.xlsx';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
-  showToast('ส่งออก Excel แล้ว (' + sorted.length + ' เคส · 3 ชีต)');
+  showToast('ส่งออก Excel แล้ว (' + sorted.length + ' เคส · 2 ชีต)');
 }
 
 /* ============ PDF (หน้ารายงาน A4 แนวนอน → พิมพ์เป็น PDF) ============ */
@@ -6168,9 +6174,28 @@ function buildReportHtml(rows, meta){
   const s = summarizeRows(rows);
   const th = escapeHtml;
   const pill = (val, doneWord) => !val ? '<span class="pl na">ไม่ระบุ</span>' : `<span class="pl ${val === doneWord ? 'ok' : 'bad'}">${th(val)}</span>`;
-  const body = rows.map(r => {
+  const money = v => v == null || !isFinite(v) ? '-' : formatMoney(v);
+  // ตารางย่อยรายการทรัพย์สินของแต่ละเคส (แสดงใต้แถวเคส)
+  const itemsTable = (r, m) => {
+    const items = r.items || [];
+    if (!items.length) return '<div class="noit">— ไม่มีรายการทรัพย์สิน —</div>';
+    const lines = items.map((item, i) => {
+      const p = itemPriceInfo(item);
+      const qty = p.hasQty ? p.qtyNum.toLocaleString('th-TH', { maximumFractionDigits: 3 }) : th(item.qty || '-');
+      return `<tr><td class="c">${i + 1}</td><td>${th(item.name || '-')}</td><td class="c nw">${qty}</td><td class="c nw">${th(item.unit || '-')}</td>
+        <td class="r nw">${p.unitPrice == null ? '<span class="miss">ไม่พบราคา</span>' : money(p.unitPrice)}</td><td class="r nw">${money(p.lineTotal)}</td></tr>`;
+    }).join('');
+    const opLabel = r.costMethod === 'laborMachine' ? 'ค่าแรง + ค่าเครื่องจักร' : 'ค่าดำเนินการ';
+    return `<table class="items"><thead><tr><th style="width:5%">ที่</th><th>รายการทรัพย์สิน</th><th style="width:10%">จำนวน</th><th style="width:10%">หน่วย</th><th style="width:15%">ราคา/หน่วย (บาท)</th><th style="width:15%">เป็นเงิน (บาท)</th></tr></thead>
+      <tbody>${lines}
+      <tr class="st"><td colspan="5" class="r">รวมค่าวัสดุ</td><td class="r nw">${money(m.materials)}</td></tr>
+      <tr class="st"><td colspan="5" class="r">${opLabel}</td><td class="r nw">${money(m.operation)}</td></tr>
+      <tr class="st gt"><td colspan="5" class="r">รวมราคาประเมิน</td><td class="r nw">${money(m.total)}</td></tr></tbody></table>`;
+  };
+  const body = rows.map((r, idx) => {
     const m = caseMoney(r);
-    return `<tr>
+    const z = idx % 2 ? ' z' : '';
+    return `<tr class="case${z}">
       <td class="c">${th((r.fiscalYear || '') + '-' + (seqMap[r.id] || ''))}</td>
       <td class="c nw">${th(formatThaiDate(r.dateIncident))}</td>
       <td>ทล.${th(r.highway)}<div class="sub">${th(r.section)}</div>${zoneAreaText(r) ? `<div class="sub">${th(zoneAreaText(r))}</div>` : ''}</td>
@@ -6181,7 +6206,8 @@ function buildReportHtml(rows, meta){
       <td class="c">${pill(r.compensationStatus, 'ชดใช้แล้ว')}</td>
       <td class="c">${pill(r.repairStatus, 'จัดซ่อมแล้ว')}${r.hasInsurance === 'มี' ? `<div class="sub">ประกัน: ${th(shortInsurerName(r.insuranceCompany) || 'มี')}</div>` : ''}</td>
       <td class="c nw">${r.closedDate ? th(formatThaiDate(r.closedDate)) : '-'}</td>
-    </tr>`;
+    </tr>
+    <tr class="it${z}"><td></td><td colspan="9">${itemsTable(r, m)}</td></tr>`;
   }).join('');
   const title = 'รายงานอุบัติเหตุ_' + exportFileBase(rows, meta).replace(/^อุบัติเหตุ_/, '');
   return `<!doctype html><html lang="th"><head><meta charset="utf-8"><title>${th(title)}</title>
@@ -6204,7 +6230,20 @@ thead{display:table-header-group}
 th{background:#123a5e;color:#fff;font-weight:600;padding:5px 6px;border:1px solid #123a5e;font-size:9pt}
 td{padding:4px 6px;border:1px solid #dfe2dd;vertical-align:top}
 tr{break-inside:avoid}
-tbody tr:nth-child(even) td{background:#f7f8f6}
+tr.z>td{background:#f7f8f6}
+/* แถวเคสติดกับตารางทรัพย์สินด้านล่าง — ไม่ให้แยกหน้ากัน */
+tr.case{break-after:avoid}
+tr.case>td{border-bottom:0;border-top:1.5px solid #9fb0c2}
+tr.it>td{border-top:0;padding:0 6px 6px}
+table.items{width:100%;border-collapse:collapse;font-size:8.8pt;background:#fff}
+table.items thead{display:table-header-group}
+table.items th{background:#e6ecf2;color:#123a5e;border:1px solid #c9d3dd;padding:3px 6px;font-size:8.5pt}
+table.items td{border:1px solid #e3e6e1;padding:2px 6px;background:#fff}
+table.items tr.st td{border:0;padding:1px 6px;color:#5c6773;background:transparent;font-size:8.5pt}
+tr.it{break-inside:auto}
+table.items tr.gt td{font-weight:700;color:#123a5e;border-top:1px solid #123a5e}
+.miss{color:#a32d2d;font-size:8pt}
+.noit{font-size:8.5pt;color:#7a8592;padding:2px 0 0}
 .c{text-align:center}.r{text-align:right}.nw{white-space:nowrap}
 .sub{font-size:8.5pt;color:#7a8592}
 .pl{display:inline-block;white-space:nowrap;padding:0 7px;border-radius:9px;font-size:8.5pt;font-weight:600}
