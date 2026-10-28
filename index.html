@@ -5240,26 +5240,28 @@ function openCaseDetailModal(id){
   const incStr = normalizeDateStr(rec.dateIncident);
   const sentStr = normalizeDateStr(rec.sentToDistrictDate);
   const wd = window.DRAFTS && DRAFTS.addWorkdays && DRAFTS.workLeft ? DRAFTS : null;
+  // วันที่ในเส้นสถานะใช้แบบย่อ (25 ส.ค. 69) และห้ามตัดบรรทัดกลางวันที่
+  const sd = s => '<span class="cd-nw">' + escapeHtml(formatThaiDate(s)) + '</span>';
   let docCls = 'n', docSub = incStr ? 'ยังไม่ระบุวันส่ง' : 'ยังไม่ระบุวันเกิดเหตุ', docNote = '';
   if (sentStr) {
-    docCls = 'ok'; docSub = escapeHtml(formatThaiDateFull(sentStr));
+    docCls = 'ok'; docSub = sd(sentStr);
   } else if (isClosed) {
     docSub = 'ไม่ได้บันทึกวันส่ง';
   } else if (wd && incStr) {
     // แสดงวันที่ต้องส่งเอกสาร ไม่แสดงจำนวนวันทำการที่เหลือ/เลย — สีแดงบอกว่าเลยกำหนดแล้ว
     const due = wd.addWorkdays(incStr, 10);
     docCls = due <= todayStr ? 'bad' : 'warn';
-    docSub = 'กำหนดส่ง ' + escapeHtml(formatThaiDateFull(due));
+    docSub = 'กำหนดส่ง ' + sd(due);
   }
   const hasPolice = !!String(rec.policeReportNo || '').trim();
   const tilesHtml = `<div class="cd-prog">
       <ol class="cd-steps">
-        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? escapeHtml(formatThaiDateFull(incStr)) : 'ยังไม่ระบุ')}
+        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? sd(incStr) : 'ยังไม่ระบุ')}
         ${step(hasPolice ? 'ok' : 'n', 'แจ้งความ', hasPolice ? 'แล้ว' : 'ยังไม่ระบุ')}
         ${step(docCls, 'ส่งเอกสารถึงแขวง', docSub, docNote)}
         ${step(doneCls(rec.compensationStatus, 'ชดใช้แล้ว'), 'การชดใช้', escapeHtml(rec.compensationStatus || 'ยังไม่ระบุ'))}
         ${step(doneCls(rec.repairStatus, 'จัดซ่อมแล้ว'), 'การจัดซ่อม', escapeHtml(rec.repairStatus || 'ยังไม่ระบุ'))}
-        ${step(isClosed ? 'ok' : 'warn', 'ยุติเรื่อง', isClosed ? escapeHtml(formatThaiDateFull(rec.closedDate)) : 'ยังไม่ยุติ')}
+        ${step(isClosed ? 'ok' : 'warn', 'ยุติเรื่อง', isClosed ? sd(rec.closedDate) : 'ยังไม่ยุติ')}
       </ol>
       <div class="cd-age"><span>${isClosed ? 'ใช้เวลาจนยุติ' : 'ระยะเวลาค้าง'}</span><b>${days === null ? '-' : days.toLocaleString('th-TH') + ' วัน'}</b></div>
     </div>`;
