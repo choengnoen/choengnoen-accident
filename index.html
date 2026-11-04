@@ -1260,7 +1260,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
   </nav>
   <div class="header-export" id="headerExport" style="display:none">
     <button type="button" class="hx-btn" id="btnExportXlsx">⬇ Excel</button>
-    <button type="button" class="hx-btn" id="btnExportPdf">🖨 PDF</button>
+    <button type="button" class="hx-btn" id="btnExportPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.2em;margin-right:5px"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>PDF</button>
     <div class="export-menu" id="exportMenu" style="display:none"></div>
   </div>
   </div>
@@ -5340,7 +5340,7 @@ function openCaseDetailModal(id){
         </div>
         <div class="cd-foot">
           <button class="btn btn-danger" id="caseDetailDelete" style="margin-right:auto">ลบรายการ</button>
-          ${rec.repairStatus === 'จัดซ่อมแล้ว' ? '<button class="btn btn-outline" id="caseDetailToOrder" title="เปิดหน้าใบสั่งการรายวัน (ระบบบริหารหมวด) พร้อมเติม ทล./กม./ฝั่ง/เลขเคสให้ — ยังไม่บันทึกอะไร">📝 ส่งไปทำใบสั่งการ</button>' : ''}
+          ${rec.repairStatus === 'จัดซ่อมแล้ว' ? '<button class="btn btn-outline" id="caseDetailToOrder" title="เปิดหน้าใบสั่งการรายวัน (ระบบบริหารหมวด) พร้อมเติม ทล./กม./ฝั่ง/เลขเคสให้ — ยังไม่บันทึกอะไร"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;flex:none"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h4"/></svg>ส่งไปทำใบสั่งการ</button>' : ''}
           <button class="btn btn-outline" id="caseDetailClose">ปิด</button>
           <button class="btn btn-primary" id="caseDetailEdit">แก้ไขรายการ</button>
         </div>
